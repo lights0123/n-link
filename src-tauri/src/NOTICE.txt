@@ -1,0 +1,7 @@
+This program contains parts of other programs licensed under the GPL version
+3.0. They are as follows:
+
+- libnspire, available for download at
+  https://github.com/lights0123/libnspire-rs
+- Flat Remix, originally at https://github.com/daniruiz/flat-remix, with
+  parts extracted available at {}

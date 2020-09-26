@@ -1,0 +1,33 @@
+[package]
+name = "n-link"
+version = "0.1.0"
+description = "A Tauri App"
+authors = [ "Ben Schattinger <developer@lights0123.com>" ]
+license = "GPL-3.0"
+repository = "https://github.com/lights0123/n-link"
+default-run = "n-link"
+edition = "2018"
+build = "src/build.rs"
+
+[dependencies]
+anyhow = "1.0.32"
+serde_json = "1.0"
+libnspire = "0.2.1"
+lazy_static = "1.4.0"
+rusb = "0.6.4"
+serde = { version = "1.0", features = [ "derive" ] }
+tauri = { version = "0.9", features = [ "event", "notification" ] }
+native-dialog = "0.4.3"
+clap = "3.0.0-beta.2"
+indicatif = "0.15.0"
+
+[target."cfg(windows)".build-dependencies]
+winres = "0.1"
+
+[features]
+embedded-server = [ "tauri/embedded-server" ]
+no-server = [ "tauri/no-server" ]
+
+[[bin]]
+name = "n-link"
+path = "src/main.rs"
