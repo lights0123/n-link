@@ -622,9 +622,9 @@ dependencies = [
 
 [[package]]
 name = "image"
-version = "0.23.9"
+version = "0.23.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "974e194911d1f7efe3cd8a8f9db3b767e43536327e899e8bc9a12ef5711b74d2"
+checksum = "985fc06b1304d19c28d5c562ed78ef5316183f2b0053b46763a0b94862373c34"
 dependencies = [
  "bytemuck",
  "byteorder",
@@ -736,9 +736,9 @@ dependencies = [
 
 [[package]]
 name = "libnspire-sys"
-version = "0.2.2"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "db2102647463fd58465518fc903140cc3ebe189743e98f91ec16f0aadc931bc8"
+checksum = "4dff025b6869a1f163254e00fb9250d0705a4a7b645c0ce9aa3a90e65cede9b5"
 dependencies = [
  "cc",
  "globwalk",
@@ -844,6 +844,7 @@ dependencies = [
  "indicatif",
  "lazy_static",
  "libnspire",
+ "libusb1-sys",
  "native-dialog",
  "rusb",
  "serde",

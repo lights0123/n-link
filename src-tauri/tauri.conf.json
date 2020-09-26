@@ -6,7 +6,7 @@
     },
     "bundle": {
       "active": true,
-      "targets": ["osx", "msi", "appimage", "dmg"],
+      "targets": "all",
       "identifier": "com.tauri.dev",
       "icon": [
         "icons/32x32.png",

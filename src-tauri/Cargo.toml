@@ -20,6 +20,7 @@ tauri = { version = "0.9", features = [ "event", "notification" ] }
 native-dialog = "0.4.3"
 clap = "3.0.0-beta.2"
 indicatif = "0.15.0"
+libusb1-sys = { version = "0.4.2", features = [ "vendored" ] }
 
 [target."cfg(windows)".build-dependencies]
 winres = "0.1"
