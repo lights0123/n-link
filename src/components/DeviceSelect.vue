@@ -1,7 +1,10 @@
 <template>
-  <div class="header border-b px-2 py-2">
-    <el-popover width="239" :visible-arrow="false" popper-class="focus:outline-none dev-select-pop" v-model="active">
-      <div slot="reference" class="inline-block relative w-full focus:outline-none">
+  <div class="header border-b px-2 py-2 flex w-full">
+    <button @click="$devices.enumerate()" class="flex-shrink-0 mr-2 focus:outline-none" :class="$devices.enumerating && 'cursor-not-allowed opacity-25'" :disabled="$devices.enumerating">
+    <img src="~feather-icons/dist/icons/refresh-cw.svg" class="w-5"/>
+    </button>
+    <el-popover width="239" :visible-arrow="false" popper-class="focus:outline-none dev-select-pop" v-model="active" class="w-full overflow-hidden">
+      <div slot="reference" class="relative w-full focus:outline-none">
         <div
             class="block w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-3/2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline h-8 truncate">
           <span v-if="selectedCalculator">
@@ -10,7 +13,7 @@
             <span v-else> {{ calc.name }}</span>
           </span>
           <span v-else class="text-gray-700 text-sm">
-            Select...
+            Select a device...
           </span>
         </div>
         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">

@@ -50,7 +50,7 @@ export type PartialCmd = { action: 'download'; path: [string, number]; dest: str
 
 export type Cmd = { id: number } & PartialCmd;
 
-export type Device = { name: string; info?: Info; progress?: Progress; queue?: Cmd[]; running?: boolean };
+export type Device = { name: string; isCxIi: boolean; needsDrivers: boolean; info?: Info; progress?: Progress; queue?: Cmd[]; running?: boolean };
 
 async function downloadFile(dev: DevId | string, path: [string, number], dest: string) {
     if (typeof dev === 'string') dev = stringToDev(dev);
@@ -118,18 +118,16 @@ let queueId = 0;
 @Component
 class Devices extends Vue {
     devices: Record<string, Device> = {};
+    enumerating = false;
 
     created() {
-        promisified({cmd: 'enumerate'}).then(devs => {
-            for (const dev of devs as (Device & DevId)[]) {
-                this.$set(this.devices, devToString(dev as DevId), dev);
-            }
-        }, console.error);
+        this.enumerate().catch(console.error);
         listen('addDevice', dev => {
             const payload = dev.payload as Device & DevId;
             const str = devToString(payload);
             const existing = this.devices[str] || {};
             this.$set(this.devices, str, {...existing, ...payload});
+            console.log(dev);
         });
         listen('removeDevice', dev => {
             this.$delete(this.devices, devToString(dev.payload as DevId));
@@ -191,6 +189,18 @@ class Devices extends Vue {
         }
         device.queue?.push(...cmds.map(cmd => ({...cmd, id: queueId++} as Cmd)));
         this.runQueue(dev);
+    }
+
+    async enumerate() {
+        this.enumerating = true;
+        try {
+            for (const dev of await promisified({cmd: 'enumerate'}) as (Device & DevId)[]) {
+                this.$set(this.devices, devToString(dev as DevId), dev);
+                console.log(dev);
+            }
+        }finally {
+            this.enumerating = false;
+        }
     }
 
     async open(dev: DevId | string) {

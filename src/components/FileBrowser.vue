@@ -16,7 +16,7 @@
         <file-view v-if="!loading && files" :files="files" :show-hidden="showHidden" @nav="path = $event"
                    @select="selected = $event"/>
         <div v-else-if="loading" class="flex items-center justify-center h-full">
-        <div class="lds-dual-ring" />
+          <div class="lds-dual-ring"/>
         </div>
       </div>
       <div class="overflow-auto h-full px-4 pt-4 w-48 flex-shrink-0 border-l">
@@ -98,6 +98,7 @@ export default class FileBrowser extends Vue {
   width: 80px;
   height: 80px;
 }
+
 .lds-dual-ring:after {
   $color: theme('colors.gray.400');
   content: " ";

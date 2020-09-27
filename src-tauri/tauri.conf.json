@@ -30,7 +30,8 @@
     },
     "allowlist": {
       "event": true,
-      "notification": true
+      "notification": true,
+      "open": true
     },
     "window": {
       "title": "N-Link",

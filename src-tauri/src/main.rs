@@ -3,7 +3,7 @@
 //   windows_subsystem = "windows"
 // )]
 
-use std::collections::HashMap;
+use hashbrown::HashMap;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::PathBuf;
@@ -35,6 +35,7 @@ pub struct Device {
   name: String,
   device: Arc<rusb::Device<GlobalContext>>,
   state: DeviceState,
+  needs_drivers: bool,
 }
 lazy_static::lazy_static! {
   static ref DEVICES: RwLock<HashMap<(u8, u8), Device>> = RwLock::new(HashMap::new());
@@ -55,6 +56,7 @@ impl Hotplug<GlobalContext> for DeviceMon {
       match add_device(device.clone()) {
         Ok(dev) => {
           let name = (dev.1).name.clone();
+          let needs_drivers = (dev.1).needs_drivers;
           DEVICES.write().unwrap().insert(dev.0, dev.1);
           if let Err(msg) = tauri::event::emit(
             &mut handle,
@@ -66,6 +68,7 @@ impl Hotplug<GlobalContext> for DeviceMon {
               },
               name,
               is_cx_ii,
+              needs_drivers,
             }),
           ) {
             eprintln!("{}", msg);
@@ -85,23 +88,43 @@ impl Hotplug<GlobalContext> for DeviceMon {
   }
 
   fn device_left(&mut self, device: rusb::Device<GlobalContext>) {
-    if let Some((dev, _)) = DEVICES
+    // if let Some((dev, _)) = DEVICES
+    //   .write()
+    //   .unwrap()
+    //   .remove_entry(&(device.bus_number(), device.address()))
+    // {
+    //   if let Err(msg) = tauri::event::emit(
+    //     &mut self.handle,
+    //     "removeDevice",
+    //     Some(DevId {
+    //       bus_number: dev.0,
+    //       address: dev.1,
+    //     }),
+    //   ) {
+    //     eprintln!("{}", msg);
+    //   };
+    // }
+  }
+}
+
+fn err_wrap<T>(
+  res: Result<T, libnspire::Error>,
+  dev: DevId,
+  handle: &mut WebviewMut,
+) -> Result<T, libnspire::Error> {
+  if let Err(ref e) = res {
+    dbg!(e);
+  }
+  if let Err(libnspire::Error::NoDevice) = res {
+    DEVICES
       .write()
       .unwrap()
-      .remove_entry(&(device.bus_number(), device.address()))
-    {
-      if let Err(msg) = tauri::event::emit(
-        &mut self.handle,
-        "removeDevice",
-        Some(DevId {
-          bus_number: dev.0,
-          address: dev.1,
-        }),
-      ) {
-        eprintln!("{}", msg);
-      };
-    }
+      .remove(&(dev.bus_number, dev.address));
+    if let Err(msg) = tauri::event::emit(handle, "removeDevice", Some(dev)) {
+      eprintln!("{}", msg);
+    };
   }
+  res
 }
 
 fn progress_sender<'a>(
@@ -180,28 +203,7 @@ fn main() {
               }
               promise_fn(
                 webview,
-                move || {
-                  let _ = cmd::enumerate();
-                  Ok(
-                    DEVICES
-                      .read()
-                      .unwrap()
-                      .iter()
-                      .map(|dev| AddDevice {
-                        dev: dbg!(DevId {
-                          bus_number: (dev.0).0,
-                          address: (dev.0).1,
-                        }),
-                        name: (dev.1).name.clone(),
-                        is_cx_ii: (dev.1)
-                          .device
-                          .device_descriptor()
-                          .map(|d| d.product_id() == PID_CX2)
-                          .unwrap_or(false),
-                      })
-                      .collect::<Vec<_>>(),
-                  )
-                },
+                move || Ok(cmd::enumerate(&mut wv_handle)?),
                 promise,
               );
             }
@@ -253,8 +255,7 @@ fn main() {
                 move || {
                   let handle = get_open_dev(&dev)?;
                   let handle = handle.lock().unwrap();
-
-                  let info = handle.info()?;
+                  let info = err_wrap(handle.info(), dev, &mut wv_handle)?;
                   Ok(info)
                 },
                 promise,
@@ -266,7 +267,7 @@ fn main() {
                 move || {
                   let handle = get_open_dev(&dev)?;
                   let handle = handle.lock().unwrap();
-                  let dir = handle.list_dir(&path)?;
+                  let dir = err_wrap(handle.list_dir(&path), dev, &mut wv_handle)?;
 
                   Ok(
                     dir
@@ -296,10 +297,14 @@ fn main() {
                   let handle = get_open_dev(&dev)?;
                   let handle = handle.lock().unwrap();
                   let mut buf = vec![0; size as usize];
-                  handle.read_file(
-                    &file,
-                    &mut buf,
-                    &mut progress_sender(&mut wv_handle, dev, size as usize),
+                  err_wrap(
+                    handle.read_file(
+                      &file,
+                      &mut buf,
+                      &mut progress_sender(&mut wv_handle.clone(), dev, size as usize),
+                    ),
+                    dev,
+                    &mut wv_handle,
                   )?;
                   if let Some(name) = file.split('/').last() {
                     File::create(dest.join(name))?.write_all(&buf)?;
@@ -328,10 +333,14 @@ fn main() {
                     .ok_or_else(|| anyhow::anyhow!("Failed to get file name"))?
                     .to_string_lossy()
                     .to_string();
-                  handle.write_file(
-                    &format!("{}/{}", path, name),
-                    &buf,
-                    &mut progress_sender(&mut wv_handle, dev, buf.len()),
+                  err_wrap(
+                    handle.write_file(
+                      &format!("{}/{}", path, name),
+                      &buf,
+                      &mut progress_sender(&mut wv_handle.clone(), dev, buf.len()),
+                    ),
+                    dev,
+                    &mut wv_handle,
                   )?;
                   Ok(())
                 },
@@ -346,7 +355,14 @@ fn main() {
                   let handle = handle.lock().unwrap();
                   let mut buf = vec![];
                   File::open(&src)?.read_to_end(&mut buf)?;
-                  handle.send_os(&buf, &mut progress_sender(&mut wv_handle, dev, buf.len()))?;
+                  err_wrap(
+                    handle.send_os(
+                      &buf,
+                      &mut progress_sender(&mut wv_handle.clone(), dev, buf.len()),
+                    ),
+                    dev,
+                    &mut wv_handle,
+                  )?;
                   Ok(())
                 },
                 promise,
@@ -358,7 +374,7 @@ fn main() {
                 move || {
                   let handle = get_open_dev(&dev)?;
                   let handle = handle.lock().unwrap();
-                  handle.delete_file(&path)?;
+                  err_wrap(handle.delete_file(&path), dev, &mut wv_handle)?;
                   Ok(())
                 },
                 promise,
@@ -370,7 +386,7 @@ fn main() {
                 move || {
                   let handle = get_open_dev(&dev)?;
                   let handle = handle.lock().unwrap();
-                  handle.delete_dir(&path)?;
+                  err_wrap(handle.delete_dir(&path), dev, &mut wv_handle)?;
                   Ok(())
                 },
                 promise,
@@ -382,7 +398,7 @@ fn main() {
                 move || {
                   let handle = get_open_dev(&dev)?;
                   let handle = handle.lock().unwrap();
-                  handle.create_dir(&path)?;
+                  err_wrap(handle.create_dir(&path), dev, &mut wv_handle)?;
                   Ok(())
                 },
                 promise,
@@ -399,7 +415,7 @@ fn main() {
                 move || {
                   let handle = get_open_dev(&dev)?;
                   let handle = handle.lock().unwrap();
-                  handle.move_file(&src, &dest)?;
+                  err_wrap(handle.move_file(&src, &dest), dev, &mut wv_handle)?;
                   Ok(())
                 },
                 promise,
@@ -416,7 +432,7 @@ fn main() {
                 move || {
                   let handle = get_open_dev(&dev)?;
                   let handle = handle.lock().unwrap();
-                  handle.copy_file(&src, &dest)?;
+                  err_wrap(handle.copy_file(&src, &dest), dev, &mut wv_handle)?;
                   Ok(())
                 },
                 promise,
