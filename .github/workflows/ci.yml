@@ -66,4 +66,4 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: my-artifact-${{ runner.os }}
-          path: src-tauri/target/release
+          path: src-tauri/target/release/bundle
