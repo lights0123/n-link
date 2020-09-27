@@ -84,7 +84,7 @@ export default class Home extends Vue {
   }
 
   installDrivers() {
-    open('https://github.com');
+    open('https://zadig.akeo.ie/');
   }
 }
 </script>

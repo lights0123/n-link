@@ -112,9 +112,6 @@ fn err_wrap<T>(
   dev: DevId,
   handle: &mut WebviewMut,
 ) -> Result<T, libnspire::Error> {
-  if let Err(ref e) = res {
-    dbg!(e);
-  }
   if let Err(libnspire::Error::NoDevice) = res {
     DEVICES
       .write()

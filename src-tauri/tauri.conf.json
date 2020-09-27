@@ -7,7 +7,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.tauri.dev",
+      "identifier": "com.lights0123.n-link",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
@@ -19,8 +19,8 @@
       "externalBin": [],
       "copyright": "Copyright (c) 2020 Ben Schattinger. Licensed under GPL-3.0",
       "category": "Utility",
-      "shortDescription": "",
-      "longDescription": "",
+      "shortDescription": "Free, cross-platform, CX-II compatible computer linking program for the TI-Nspire",
+      "longDescription": "Free, cross-platform, CX-II compatible computer linking program for the TI-Nspire",
       "osx": {
         "frameworks": [],
         "minimumSystemVersion": "",

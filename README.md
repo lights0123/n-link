@@ -1,18 +1,20 @@
-# n-link
+# N-Link
+
+Free, cross-platform, CX-II compatible computer linking program for the TI-Nspire
 
 ## Project setup
 ```
-yarn install
+yarn
 ```
 
 ### Compiles and hot-reloads for development
 ```
-yarn serve
+yarn tauri:serve
 ```
 
 ### Compiles and minifies for production
 ```
-yarn build
+yarn tauri:build
 ```
 
 ### Lints and fixes files

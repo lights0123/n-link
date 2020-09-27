@@ -148,7 +148,7 @@ pub enum Cmd {
 }
 
 pub fn add_device(dev: Arc<rusb::Device<GlobalContext>>) -> rusb::Result<((u8, u8), Device)> {
-  let descriptor = dbg!(dev.device_descriptor()?);
+  let descriptor = dev.device_descriptor()?;
   if !(descriptor.vendor_id() == VID && matches!(descriptor.product_id(), PID | PID_CX2)) {
     return Err(rusb::Error::Other);
   }
@@ -164,9 +164,9 @@ pub fn add_device(dev: Arc<rusb::Device<GlobalContext>>) -> rusb::Result<((u8, u
     ),
     Err(rusb::Error::NotSupported) => (
       if descriptor.product_id() == PID_CX2 {
-        "TI Nspire CX II"
+        "TI-Nspire CX II"
       } else {
-        "TI Nspire"
+        "TI-Nspire"
       }
       .to_string(),
       true,
@@ -213,19 +213,13 @@ pub fn enumerate(handle: &mut WebviewMut) -> Result<Vec<AddDevice>, libnspire::E
   Ok(
     filtered
       .into_iter()
-      .filter_map(|dev| {
-        match add_device(Arc::new(dev)) {
-          Ok(d) => Ok(d),
-          Err(e) => Err(dbg!(e)),
-        }
-        .ok()
-      })
+      .filter_map(|dev| add_device(Arc::new(dev)).ok())
       .map(|dev| {
         let msg = AddDevice {
-          dev: dbg!(DevId {
+          dev: DevId {
             bus_number: (dev.0).0,
             address: (dev.0).1,
-          }),
+          },
           name: (dev.1).name.clone(),
           is_cx_ii: (dev.1)
             .device

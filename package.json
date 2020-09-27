@@ -1,10 +1,9 @@
 {
   "name": "n-link",
+  "description": "Free, cross-platform, CX-II compatible computer linking program for the TI-Nspire",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "tauri:build": "vue-cli-service tauri:build",
     "tauri:serve": "vue-cli-service tauri:serve"

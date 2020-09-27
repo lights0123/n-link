@@ -1,7 +1,7 @@
 [package]
 name = "n-link"
 version = "0.1.0"
-description = "A Tauri App"
+description = "Free, cross-platform, CX-II compatible computer linking program for the TI-Nspire"
 authors = [ "Ben Schattinger <developer@lights0123.com>" ]
 license = "GPL-3.0"
 repository = "https://github.com/lights0123/n-link"

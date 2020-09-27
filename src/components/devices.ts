@@ -127,7 +127,6 @@ class Devices extends Vue {
             const str = devToString(payload);
             const existing = this.devices[str] || {};
             this.$set(this.devices, str, {...existing, ...payload});
-            console.log(dev);
         });
         listen('removeDevice', dev => {
             this.$delete(this.devices, devToString(dev.payload as DevId));
@@ -196,9 +195,8 @@ class Devices extends Vue {
         try {
             for (const dev of await promisified({cmd: 'enumerate'}) as (Device & DevId)[]) {
                 this.$set(this.devices, devToString(dev as DevId), dev);
-                console.log(dev);
             }
-        }finally {
+        } finally {
             this.enumerating = false;
         }
     }
