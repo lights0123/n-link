@@ -5,11 +5,37 @@ on:
       - release
 
 jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      RELEASE_UPLOAD_ID: ${{ steps.create_release.outputs.id }}
+      RELEASE_UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - name: get version
+        run: echo ::set-env name=PACKAGE_VERSION::$(node -p "require('./package.json').version")
+      - name: create release
+        id: create_release
+        uses: actions/create-release@v1.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.PACKAGE_VERSION }}
+          release_name: "N-Link v${{ env.PACKAGE_VERSION }}"
+          body: "See the assets to download this version and install."
+          draft: true
+          prerelease: false
   publish-tauri:
+    needs: create-release
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, ubuntu-18.04, windows-latest]
+        platform: [ macos-latest, ubuntu-18.04, windows-latest ]
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -58,12 +84,47 @@ jobs:
       - name: install app dependencies
         run: yarn
       - uses: tauri-apps/tauri-action@v0
+        if: runner.os == 'Linux'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           npmScript: "tauri:build"
-          tagName: v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
-          releaseName: "N-Link v__VERSION__"
-          body: "See the assets to download this version and install."
-          draft: true
-          prerelease: false
+      - uses: tauri-apps/tauri-action@v0
+        if: runner.os != 'Linux'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          npmScript: "tauri:build"
+          releaseId: ${{ needs.create-release.outputs.RELEASE_UPLOAD_ID }}
+      - name: Upload Release
+        if: runner.os == 'Linux'
+        uses: actions/github-script@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            console.log('environment', process.versions);
+
+            const fs = require('fs').promises;
+
+            const {repo: {owner, repo}, sha} = context;
+            console.log({owner, repo, sha});
+            const {name, version} = require('./package.json');
+            const arch = process.arch === 'x64' ? 'amd64' : process.arch;
+
+            for (let file of (await fs.readdir('src-tauri/target/release/bundle/deb', {withFileTypes: true})).filter(dir => dir.isFile()).map(({name}) => name)) {
+              console.log('uploading', file);
+
+              await github.repos.uploadReleaseAsset({
+                owner, repo,
+                release_id: "${{ needs.create-release.outputs.RELEASE_UPLOAD_ID }}",
+                name: file,
+                data: await fs.readFile(`./${file}`)
+              });
+            }
+
+            await github.repos.uploadReleaseAsset({
+              owner, repo,
+              release_id: "${{ needs.create-release.outputs.RELEASE_UPLOAD_ID }}",
+              name: `${name}_${version}_${arch}.AppImage`,
+              data: await fs.readFile(`src-tauri/target/release/bundle/appimage/n-link.AppImage`)
+            });

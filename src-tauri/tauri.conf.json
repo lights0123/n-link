@@ -6,7 +6,7 @@
     },
     "bundle": {
       "active": true,
-      "targets": "all",
+      "targets": ["deb", "msi", "appimage", "dmg"],
       "identifier": "com.lights0123.n-link",
       "icon": [
         "icons/32x32.png",
