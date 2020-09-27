@@ -108,7 +108,7 @@ jobs:
 
             const {repo: {owner, repo}, sha} = context;
             console.log({owner, repo, sha});
-            const {name, version} = require('./package.json');
+            const {name, version} = require('${process.env.GITHUB_WORKSPACE}/package.json');
             const arch = process.arch === 'x64' ? 'amd64' : process.arch;
 
             for (let file of (await fs.readdir('${process.env.GITHUB_WORKSPACE}/src-tauri/target/release/bundle/deb', {withFileTypes: true})).filter(dir => dir.isFile()).map(({name}) => name)) {
