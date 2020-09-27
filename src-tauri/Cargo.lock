@@ -736,9 +736,9 @@ dependencies = [
 
 [[package]]
 name = "libnspire-sys"
-version = "0.2.7"
+version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4e21d30751221883dfbca2ca8c27ae31aaeef98f18f0f77a732338b327d4d69"
+checksum = "0cfeeba4961fb36c395f19c068239f7cfcf8a2604b1c92595e3b6e8149c3e2e0"
 dependencies = [
  "cc",
  "globwalk",
