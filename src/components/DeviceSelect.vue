@@ -3,7 +3,7 @@
     <el-popover width="239" :visible-arrow="false" popper-class="focus:outline-none dev-select-pop" v-model="active">
       <div slot="reference" class="inline-block relative w-full focus:outline-none">
         <div
-            class="block w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-1.5 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline h-8 truncate">
+            class="block w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-3/2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline h-8 truncate">
           <span v-if="selectedCalculator">
             <small class="tabular-nums">{{ selectedCalculator }}</small>
             <span v-if="calc && calc.info"> {{ calc.info.name }}</span>

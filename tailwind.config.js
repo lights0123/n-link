@@ -32,7 +32,7 @@ module.exports = {
       },
       padding: {
         '2.5': '0.625em',
-        '1.5': '0.375em',
+        '3/2': '0.375em',
       },
       colors: {
         ui: {
