@@ -111,14 +111,14 @@ jobs:
             const {name, version} = require('./package.json');
             const arch = process.arch === 'x64' ? 'amd64' : process.arch;
 
-            for (let file of (await fs.readdir('src-tauri/target/release/bundle/deb', {withFileTypes: true})).filter(dir => dir.isFile()).map(({name}) => name)) {
+            for (let file of (await fs.readdir('${process.env.GITHUB_WORKSPACE}/src-tauri/target/release/bundle/deb', {withFileTypes: true})).filter(dir => dir.isFile()).map(({name}) => name)) {
               console.log('uploading', file);
 
               await github.repos.uploadReleaseAsset({
                 owner, repo,
                 release_id: "${{ needs.create-release.outputs.RELEASE_UPLOAD_ID }}",
                 name: file,
-                data: await fs.readFile(`./${file}`)
+                data: await fs.readFile(`${process.env.GITHUB_WORKSPACE}/${file}`)
               });
             }
 
@@ -126,5 +126,5 @@ jobs:
               owner, repo,
               release_id: "${{ needs.create-release.outputs.RELEASE_UPLOAD_ID }}",
               name: `${name}_${version}_${arch}.AppImage`,
-              data: await fs.readFile(`src-tauri/target/release/bundle/appimage/n-link.AppImage`)
+              data: await fs.readFile(`${process.env.GITHUB_WORKSPACE}/src-tauri/target/release/bundle/appimage/n-link.AppImage`)
             });
