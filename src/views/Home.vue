@@ -65,7 +65,6 @@ export default class Home extends Vue {
   @Watch('selectedCalculator')
   async onSelectCalculator(dev: string | null) {
     if (dev && !this.$devices.devices[dev].info && !this.$devices.devices[dev].needsDrivers) {
-      console.log('open', dev);
       try {
         await this.$devices.open(dev);
       }catch(e) {

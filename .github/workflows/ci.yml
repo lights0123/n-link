@@ -3,6 +3,7 @@ on:
   push:
     branches-ignore:
       - 'dependabot/**'
+      - publish
   pull_request:
 
 jobs:
@@ -10,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, ubuntu-16.04, windows-latest]
+        platform: [macos-latest, ubuntu-18.04, windows-latest]
 
     runs-on: ${{ matrix.platform }}
     steps:
