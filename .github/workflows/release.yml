@@ -84,13 +84,6 @@ jobs:
       - name: install app dependencies
         run: yarn
       - uses: tauri-apps/tauri-action@v0
-        if: runner.os == 'Linux'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          npmScript: "tauri:build"
-      - uses: tauri-apps/tauri-action@v0
-        if: runner.os != 'Linux'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -108,19 +101,8 @@ jobs:
 
             const {repo: {owner, repo}, sha} = context;
             console.log({owner, repo, sha});
-            const {name, version} = require('${process.env.GITHUB_WORKSPACE}/package.json');
+            const {name, version} = require(`${process.env.GITHUB_WORKSPACE}/package.json`);
             const arch = process.arch === 'x64' ? 'amd64' : process.arch;
-
-            for (let file of (await fs.readdir('${process.env.GITHUB_WORKSPACE}/src-tauri/target/release/bundle/deb', {withFileTypes: true})).filter(dir => dir.isFile()).map(({name}) => name)) {
-              console.log('uploading', file);
-
-              await github.repos.uploadReleaseAsset({
-                owner, repo,
-                release_id: "${{ needs.create-release.outputs.RELEASE_UPLOAD_ID }}",
-                name: file,
-                data: await fs.readFile(`${process.env.GITHUB_WORKSPACE}/${file}`)
-              });
-            }
 
             await github.repos.uploadReleaseAsset({
               owner, repo,
