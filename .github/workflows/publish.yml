@@ -24,7 +24,7 @@ jobs:
             ${{ steps.yarn-cache-dir-path.outputs.dir }}
           key: ${{ matrix.platform }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-
+            ${{ matrix.platform }}-yarn-
       - uses: actions/cache@v2
         with:
           path: |
@@ -34,7 +34,7 @@ jobs:
             src-tauri/target
           key: ${{ matrix.platform }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
-            ${{ runner.os }}-cargo-
+            ${{ matrix.platform }}-cargo-
       - name: setup node
         uses: actions/setup-node@v1
         with:
