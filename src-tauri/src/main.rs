@@ -188,10 +188,10 @@ fn main() {
                       .unwrap()
                       .iter()
                       .map(|dev| AddDevice {
-                        dev: DevId {
+                        dev: dbg!(DevId {
                           bus_number: (dev.0).0,
                           address: (dev.0).1,
-                        },
+                        }),
                         name: (dev.1).name.clone(),
                         is_cx_ii: (dev.1)
                           .device

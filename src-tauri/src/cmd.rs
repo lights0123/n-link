@@ -2,7 +2,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use libnspire::{PID, PID_CX2, VID};
-use rusb::GlobalContext;
+use rusb::{GlobalContext, Error};
 use serde::{Deserialize, Serialize};
 
 use crate::{Device, DeviceState};
@@ -146,7 +146,7 @@ pub enum Cmd {
 }
 
 pub fn add_device(dev: Arc<rusb::Device<GlobalContext>>) -> rusb::Result<((u8, u8), Device)> {
-  let descriptor = dev.device_descriptor()?;
+  let descriptor = dbg!(dev.device_descriptor()?);
   if !(descriptor.vendor_id() == VID && matches!(descriptor.product_id(), PID | PID_CX2)) {
     return Err(rusb::Error::Other);
   }
@@ -155,11 +155,11 @@ pub fn add_device(dev: Arc<rusb::Device<GlobalContext>>) -> rusb::Result<((u8, u
   Ok((
     (dev.bus_number(), dev.address()),
     Device {
-      name: handle.read_product_string(
+      name: dbg!(handle.read_product_string(
         handle.read_languages(Duration::from_millis(100))?[0],
         &descriptor,
         Duration::from_millis(100),
-      )?,
+      ))?,
       device: dev,
       state: DeviceState::Closed,
     },
@@ -170,7 +170,10 @@ pub fn enumerate() -> Result<(), libnspire::Error> {
   crate::DEVICES.write().unwrap().extend(
     rusb::devices()?
       .iter()
-      .filter_map(|dev| add_device(Arc::new(dev)).ok()),
+      .filter_map(|dev| match add_device(Arc::new(dev)){
+        Ok(d) => Ok(d),
+        Err(e) => Err(dbg!(e)),
+      }.ok()),
   );
   Ok(())
 }
