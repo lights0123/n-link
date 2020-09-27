@@ -65,5 +65,5 @@ jobs:
           npmScript: "tauri:build"
       - uses: actions/upload-artifact@v2
         with:
-          name: my-artifact ${{ matrix.node-version }}
-          path: src-tauri/target/release/bundle
+          name: my-artifact-${{ runner.os }}
+          path: src-tauri/target/release
