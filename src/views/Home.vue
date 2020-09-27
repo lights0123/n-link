@@ -12,7 +12,7 @@
             </p>
           </div>
           <div v-else-if="calculator && !calculator.info" class="flex items-center justify-center h-full">
-            <div class="lds-dual-ring" />
+            <div class="lds-dual-ring"/>
           </div>
           <div v-else-if="calculator && calculator.info">
             <calc-info :info="calculator.info" :dev="selectedCalculator"/>
@@ -39,6 +39,10 @@ import CalcInfo from '@/components/CalcInfo.vue';
 import FileBrowser from '@/components/FileBrowser.vue';
 import DeviceSelect from "@/components/DeviceSelect.vue";
 
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 @Component({
   components: {
     DeviceSelect,
@@ -50,9 +54,17 @@ export default class Home extends Vue {
   selectedCalculator: string | null = null;
   showHidden = false;
 
+  @Watch('$devices.hasEnumerated')
+  onEnumerated() {
+    const first = Object.keys(this.$devices.devices)[0];
+    if (first) this.selectedCalculator = first;
+  }
+
   @Watch('$devices.devices')
-  onDeviceChange() {
+  async onDeviceChange() {
     if (!this.selectedCalculator) {
+      await sleep(1000);
+      if (this.selectedCalculator) return;
       const first = Object.keys(this.$devices.devices)[0];
       if (first) this.selectedCalculator = first;
     } else if (!Object.keys(this.$devices.devices).includes(this.selectedCalculator)) {
@@ -67,7 +79,7 @@ export default class Home extends Vue {
     if (dev && !this.$devices.devices[dev].info && !this.$devices.devices[dev].needsDrivers) {
       try {
         await this.$devices.open(dev);
-      }catch(e) {
+      } catch (e) {
         console.error(e);
         this.selectedCalculator = null;
       }
@@ -83,7 +95,7 @@ export default class Home extends Vue {
   }
 
   installDrivers() {
-    open('https://zadig.akeo.ie/');
+    open('https://lights0123.com/n-link/#windows');
   }
 }
 </script>

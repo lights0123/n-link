@@ -119,9 +119,10 @@ let queueId = 0;
 class Devices extends Vue {
     devices: Record<string, Device> = {};
     enumerating = false;
+    hasEnumerated = false;
 
     created() {
-        this.enumerate().catch(console.error);
+        this.enumerate().then(() => this.hasEnumerated = true, console.error);
         listen('addDevice', dev => {
             const payload = dev.payload as Device & DevId;
             const str = devToString(payload);

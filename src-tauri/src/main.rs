@@ -1,7 +1,7 @@
-// #![cfg_attr(
-//   all(not(debug_assertions), target_os = "windows"),
-//   windows_subsystem = "windows"
-// )]
+#![cfg_attr(
+  all(not(debug_assertions), target_os = "windows"),
+  windows_subsystem = "windows"
+)]
 
 use hashbrown::HashMap;
 use std::fs::File;
@@ -88,22 +88,22 @@ impl Hotplug<GlobalContext> for DeviceMon {
   }
 
   fn device_left(&mut self, device: rusb::Device<GlobalContext>) {
-    // if let Some((dev, _)) = DEVICES
-    //   .write()
-    //   .unwrap()
-    //   .remove_entry(&(device.bus_number(), device.address()))
-    // {
-    //   if let Err(msg) = tauri::event::emit(
-    //     &mut self.handle,
-    //     "removeDevice",
-    //     Some(DevId {
-    //       bus_number: dev.0,
-    //       address: dev.1,
-    //     }),
-    //   ) {
-    //     eprintln!("{}", msg);
-    //   };
-    // }
+    if let Some((dev, _)) = DEVICES
+      .write()
+      .unwrap()
+      .remove_entry(&(device.bus_number(), device.address()))
+    {
+      if let Err(msg) = tauri::event::emit(
+        &mut self.handle,
+        "removeDevice",
+        Some(DevId {
+          bus_number: dev.0,
+          address: dev.1,
+        }),
+      ) {
+        eprintln!("{}", msg);
+      };
+    }
   }
 }
 
