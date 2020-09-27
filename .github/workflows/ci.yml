@@ -45,7 +45,12 @@ jobs:
         with:
           toolchain: stable
       - name: install tauri bundler
+        if: runner.os != 'Windows'
         run: cargo install tauri-bundler || [ $? -eq 101 ]
+      - name: install tauri bundler
+        if: runner.os == 'Windows'
+        run: cargo install tauri-bundler; exit ($LASTEXITCODE -ne 101 -and $LASTEXITCODE -ne 0)
+        shell: powershell -command "& '{0}'"
       - name: install webkit2gtk (ubuntu only)
         if: matrix.platform == 'ubuntu-latest'
         run: |
