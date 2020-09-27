@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, ubuntu-latest, windows-latest]
+        platform: [macos-latest, ubuntu-18.04, windows-latest]
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -51,7 +51,7 @@ jobs:
         run: cargo install tauri-bundler; exit ($LASTEXITCODE -ne 101 -and $LASTEXITCODE -ne 0)
         shell: powershell -command "& '{0}'"
       - name: install webkit2gtk (ubuntu only)
-        if: matrix.platform == 'ubuntu-16.04'
+        if: matrix.platform == 'ubuntu-18.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y webkit2gtk-4.0 squashfs-tools
