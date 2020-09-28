@@ -729,9 +729,9 @@ checksum = "3286f09f7d4926fc486334f28d8d2e6ebe4f7f9994494b6dab27ddfad2c9b11b"
 
 [[package]]
 name = "libnspire"
-version = "0.2.2"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6788297de38fe5adfd240fa090e9af5dc54c092f6311e7a7de62043e7dd8f54b"
+checksum = "b6428b72ef81134d34d077748639ae280cf8b5b3314ae99fa8ff1e34cbc1d64b"
 dependencies = [
  "array_iterator",
  "displaydoc",
@@ -745,9 +745,9 @@ dependencies = [
 
 [[package]]
 name = "libnspire-sys"
-version = "0.2.9"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3af1040fe794b4f0c427b3b955db5caf2d45e42115d87a2dc58a1ac43b13436"
+checksum = "66d43cba14a98407deb8d0b985d9252254ca2fdeeadfd7812123a87c88ab2009"
 dependencies = [
  "cc",
  "globwalk",
