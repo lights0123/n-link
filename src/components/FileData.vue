@@ -51,7 +51,7 @@
     </div>
     <div class="flex-grow"/>
     <div class="pb-4">
-      <el-popover v-if="path" width="170" popper-class="focus:outline-none" v-model="createDirPopup" @show="newName = ''">
+      <el-popover width="170" popper-class="focus:outline-none" v-model="createDirPopup" @show="newName = ''">
         <button slot="reference" class="mt-4 button w-full text-sm">
           Create directory
         </button>
@@ -88,7 +88,7 @@ export default class FileData extends Vue {
   @Prop({type: Array, default: () => ([])}) private files!: FileInfo[];
   @Prop({type: String, required: true}) private path!: string;
   @Prop({type: Boolean, default: false}) private showHidden!: boolean;
-  @Prop({type: [Object, String], required: true}) private dev!: DevId | string;
+  @Prop({type: String, required: true}) private dev!: string;
   newName = '';
   renamePopup = false;
   deletePopup = false;

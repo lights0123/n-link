@@ -44,7 +44,7 @@ import fileSize from "filesize";
 @Component
 export default class FileView extends Vue {
   @Prop({type: Object, required: true}) private info!: Info;
-  @Prop({type: [Object, String], required: true}) private dev!: DevId | string;
+  @Prop({type: String, required: true}) private dev!: string;
   refreshing = false;
 
   formatSize(size: number) {
