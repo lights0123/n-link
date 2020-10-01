@@ -38,7 +38,7 @@
 
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator';
-import type {Info, Version, DevId} from '@/components/devices';
+import type {Info, Version} from '@/components/devices';
 import fileSize from "filesize";
 
 @Component
