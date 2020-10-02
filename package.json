@@ -1,43 +1,6 @@
 {
-  "name": "n-link",
-  "description": "Free, cross-platform, CX-II compatible computer linking program for the TI-Nspire",
-  "version": "0.1.4",
   "private": true,
-  "scripts": {
-    "lint": "vue-cli-service lint",
-    "tauri:build": "vue-cli-service tauri:build",
-    "tauri:serve": "vue-cli-service tauri:serve"
-  },
-  "dependencies": {
-    "@tailwindcss/custom-forms": "^0.2.1",
-    "core-js": "^3.6.5",
-    "element-ui": "^2.13.2",
-    "feather-icons": "^4.28.0",
-    "filesize": "^6.1.0",
-    "tauri": "^0.12.0",
-    "vue": "^2.6.11",
-    "vue-async-computed": "^3.9.0",
-    "vue-class-component": "^7.2.3",
-    "vue-property-decorator": "^8.4.2",
-    "vue-router": "^3.2.0"
-  },
-  "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^2.33.0",
-    "@typescript-eslint/parser": "^2.33.0",
-    "@vue/cli-plugin-babel": "~4.5.0",
-    "@vue/cli-plugin-eslint": "~4.5.0",
-    "@vue/cli-plugin-router": "~4.5.0",
-    "@vue/cli-plugin-typescript": "~4.5.0",
-    "@vue/cli-service": "~4.5.0",
-    "@vue/eslint-config-typescript": "^5.0.2",
-    "eslint": "^6.7.2",
-    "eslint-plugin-vue": "^6.2.2",
-    "raw-loader": "^4.0.1",
-    "sass": "^1.26.5",
-    "sass-loader": "^8.0.2",
-    "typescript": "~3.9.3",
-    "vue-cli-plugin-tailwind": "~1.5.0",
-    "vue-cli-plugin-tauri": "~0.12.1",
-    "vue-template-compiler": "^2.6.11"
-  }
+  "workspaces": [
+    "desktop"
+  ]
 }

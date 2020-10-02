@@ -33,7 +33,7 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             ~/.cargo/bin
-            src-tauri/target
+            desktop/src-tauri/target
           key: ${{ matrix.platform }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ matrix.platform }}-cargo-
@@ -64,7 +64,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           npmScript: "tauri:build"
+          projectPath: desktop/
       - uses: actions/upload-artifact@v2
         with:
           name: my-artifact-${{ runner.os }}
-          path: src-tauri/target/release/bundle
+          path: desktop/src-tauri/target/release/bundle

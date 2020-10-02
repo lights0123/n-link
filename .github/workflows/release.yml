@@ -57,7 +57,7 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             ~/.cargo/bin
-            src-tauri/target
+            desktop/src-tauri/target
           key: ${{ matrix.platform }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ matrix.platform }}-cargo-
@@ -88,6 +88,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           npmScript: "tauri:build"
+          projectPath: desktop/
           releaseId: ${{ needs.create-release.outputs.RELEASE_UPLOAD_ID }}
       - name: Upload Release
         if: runner.os == 'Linux'
@@ -108,5 +109,5 @@ jobs:
               owner, repo,
               release_id: "${{ needs.create-release.outputs.RELEASE_UPLOAD_ID }}",
               name: `${name}_${version}_${arch}.AppImage`,
-              data: await fs.readFile(`${process.env.GITHUB_WORKSPACE}/src-tauri/target/release/bundle/appimage/n-link.AppImage`)
+              data: await fs.readFile(`${process.env.GITHUB_WORKSPACE}/desktop/src-tauri/target/release/bundle/appimage/n-link.AppImage`)
             });
