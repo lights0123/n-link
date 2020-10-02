@@ -1,6 +1,11 @@
 {
   "private": true,
   "workspaces": [
-    "desktop"
-  ]
+    "desktop",
+    "n-link-core",
+    "web"
+  ],
+  "dependencies": {
+    "@vue/cli-plugin-eslint": "~4.5.0"
+  }
 }

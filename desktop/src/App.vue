@@ -5,6 +5,7 @@
 </template>
 
 <style lang="scss">
+@import '~n-link-core/assets/tailwind.css';
 #app {
   user-select: none;
   font-family: Avenir, Helvetica, Arial, sans-serif;

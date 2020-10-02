@@ -38,7 +38,7 @@
 import {Component, Prop, Vue} from 'vue-property-decorator';
 import ElPopover from 'element-ui/packages/popover/src/main.vue';
 import 'element-ui/lib/theme-chalk/popover.css';
-import {Device} from "@/components/devices";
+import type {Device} from "./devices";
 
 function getCoordinatesForPercent(percent: number) {
   const x = Math.cos(2 * Math.PI * percent);

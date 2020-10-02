@@ -26,59 +26,59 @@ export default class FileView extends Vue {
     if (this.dir) {
       switch (this.name.trim().toLowerCase()) {
         case 'games':
-          return require('@/assets/folders/games.svg');
+          return require('../assets/folders/games.svg');
         case 'images':
         case 'photos':
-          return require('@/assets/folders/images.svg');
+          return require('../assets/folders/images.svg');
         case 'music':
         case 'sound':
         case 'sounds':
-          return require('@/assets/folders/music.svg');
+          return require('../assets/folders/music.svg');
         case 'script':
         case 'scripts':
         case 'program':
         case 'programs':
-          return require('@/assets/folders/scripts.svg');
+          return require('../assets/folders/scripts.svg');
         case 'template':
         case 'templates':
-          return require('@/assets/folders/templates.svg');
+          return require('../assets/folders/templates.svg');
         case 'video':
         case 'videos':
-          return require('@/assets/folders/video.svg');
+          return require('../assets/folders/video.svg');
         default:
-          return require('@/assets/folders/folder.svg');
+          return require('../assets/folders/folder.svg');
       }
     }
-    if (this.name === 'ndless_resources.tns') return require('@/assets/files/resources.svg');
-    if (this.name.startsWith('ndless_installer')) return require('@/assets/files/installer.svg');
+    if (this.name === 'ndless_resources.tns') return require('../assets/files/resources.svg');
+    if (this.name.startsWith('ndless_installer')) return require('../assets/files/installer.svg');
     switch (this.ext.toLowerCase()) {
       case 'bin':
-        return require('@/assets/files/binary.svg');
+        return require('../assets/files/binary.svg');
       case 'ical':
       case 'ics':
       case 'ifb':
       case 'icalendar':
-        return require('@/assets/files/calendar.svg');
+        return require('../assets/files/calendar.svg');
       case 'cfg':
-        return require('@/assets/files/cfg.svg');
+        return require('../assets/files/cfg.svg');
       case 'vcf':
-        return require('@/assets/files/contact.svg');
+        return require('../assets/files/contact.svg');
       case 'csv':
       case 'log':
       case 'logs':
-        return require('@/assets/files/csv.svg');
+        return require('../assets/files/csv.svg');
       case 'sql':
       case 'db':
       case 'sqlite':
-        return require('@/assets/files/db.svg');
+        return require('../assets/files/db.svg');
       case 'epub':
-        return require('@/assets/files/epub.svg');
+        return require('../assets/files/epub.svg');
       case 'eot':
       case 'otf':
       case 'ttf':
       case 'woff':
       case 'woff2':
-        return require('@/assets/files/font.svg');
+        return require('../assets/files/font.svg');
       case 'png':
       case 'bmp':
       case 'jpg':
@@ -117,41 +117,41 @@ export default class FileView extends Vue {
       case 'tga':
       case 'psd':
       case 'xcf':
-        return require('@/assets/files/image.svg');
+        return require('../assets/files/image.svg');
       case 'js':
       case 'mjs':
-        return require('@/assets/files/js.svg');
+        return require('../assets/files/js.svg');
       case 'json':
       case 'json5':
-        return require('@/assets/files/json.svg');
+        return require('../assets/files/json.svg');
       case 'lua':
-        return require('@/assets/files/lua.svg');
+        return require('../assets/files/lua.svg');
       case 'pdf':
-        return require('@/assets/files/pdf.svg');
+        return require('../assets/files/pdf.svg');
       case 'py':
-        return require('@/assets/files/python.svg');
+        return require('../assets/files/python.svg');
       case 'rom':
       case '89u':
       case 'smc':
       case 'sfc':
       case 'srm':
       case 'img':
-        return require('@/assets/files/rom.svg');
+        return require('../assets/files/rom.svg');
       case 'svg':
       case 'svgz':
-        return require('@/assets/files/svg.svg');
+        return require('../assets/files/svg.svg');
       case 'txt':
-        return require('@/assets/files/txt.svg');
+        return require('../assets/files/txt.svg');
       case 'mp4':
-        return require('@/assets/files/video.svg');
+        return require('../assets/files/video.svg');
       case 'xml':
-        return require('@/assets/files/xml.svg');
+        return require('../assets/files/xml.svg');
       case 'zip':
       case 'tar':
       case 'gz':
-        return require('@/assets/files/zip.svg');
+        return require('../assets/files/zip.svg');
       default:
-        return require('@/assets/files/unknown.svg');
+        return require('../assets/files/unknown.svg');
     }
   }
 }

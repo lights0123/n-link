@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@tailwindcss/custom-forms": "^0.2.1",
+    "n-link-core": "0.0.0",
     "core-js": "^3.6.5",
     "element-ui": "^2.13.2",
     "feather-icons": "^4.28.0",

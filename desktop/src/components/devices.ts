@@ -1,6 +1,7 @@
 import {promisified} from 'tauri/api/tauri';
 import {listen} from 'tauri/api/event';
 import {Component, Vue} from 'vue-property-decorator';
+import type {GenericDevices} from 'n-link-core/components/devices';
 
 
 export type DevId = { address: number; busNumber: number };
@@ -116,7 +117,7 @@ async function listAll(dev: DevId | string, path: FileInfo): Promise<FileInfo[]>
 let queueId = 0;
 
 @Component
-class Devices extends Vue {
+class Devices extends Vue implements GenericDevices {
     devices: Record<string, Device> = {};
     enumerating = false;
     hasEnumerated = false;
@@ -279,9 +280,3 @@ class Devices extends Vue {
 const devices = new Devices();
 export default devices;
 Vue.prototype.$devices = devices;
-declare module 'vue/types/vue' {
-    // 3. Declare augmentation for Vue
-    interface Vue {
-        $devices: Devices;
-    }
-}

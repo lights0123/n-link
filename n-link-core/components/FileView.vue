@@ -12,8 +12,8 @@
 
 <script lang="ts">
 import {Component, Prop, Vue, Watch} from 'vue-property-decorator';
-import type {FileInfo} from '@/components/devices';
-import FileIcon from "@/components/FileIcon.vue";
+import type {FileInfo} from './devices';
+import FileIcon from "./FileIcon.vue";
 
 @Component({
   components: {FileIcon}

@@ -35,9 +35,9 @@
 <script lang="ts">
 import {Component, Vue, Watch} from 'vue-property-decorator';
 import {open} from 'tauri/api/window';
-import CalcInfo from '@/components/CalcInfo.vue';
-import FileBrowser from '@/components/FileBrowser.vue';
-import DeviceSelect from "@/components/DeviceSelect.vue";
+import CalcInfo from 'n-link-core/components/CalcInfo.vue';
+import FileBrowser from 'n-link-core/components/FileBrowser.vue';
+import DeviceSelect from "n-link-core/components/DeviceSelect.vue";
 
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));

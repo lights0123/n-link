@@ -28,10 +28,10 @@
 
 <script lang="ts">
 import {Component, Prop, Vue, Watch} from 'vue-property-decorator';
-import FileView from '@/components/FileView.vue';
-import type {FileInfo} from "@/components/devices";
-import FileData from "@/components/FileData.vue";
-import DeviceQueue from "@/components/DeviceQueue.vue";
+import FileView from './FileView.vue';
+import type {FileInfo} from "./devices";
+import FileData from "./FileData.vue";
+import DeviceQueue from "./DeviceQueue.vue";
 
 @Component({
   asyncComputed: {

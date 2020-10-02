@@ -77,8 +77,8 @@ import {Component, Prop, Vue} from 'vue-property-decorator';
 import ElPopover from 'element-ui/packages/popover/src/main.vue';
 import 'element-ui/lib/theme-chalk/popover.css';
 import fileSize from "filesize";
-import type {FileInfo} from '@/components/devices';
-import FileIcon from "@/components/FileIcon.vue";
+import type {FileInfo} from './devices';
+import FileIcon from "./FileIcon.vue";
 
 @Component({
   components: {FileIcon, ElPopover}
