@@ -91,6 +91,5 @@ jobs:
       - name: install app dependencies
         run: yarn
       - name: Build
-        working-directory: ./web
         run: |
           yarn workspace web run generate
