@@ -37,11 +37,16 @@ import DeviceQueue from "./DeviceQueue.vue";
   asyncComputed: {
     files: {
       async get(this: FileBrowser) {
-        this.updateIndex;
-        return (await this.$devices.listDir(this.dev, this.path)).map(file => ({
-          ...file,
-          path: `${this.path}/${file.path}`
-        }));
+        try {
+          this.updateIndex;
+          return (await this.$devices.listDir(this.dev, this.path)).map(file => ({
+            ...file,
+            path: `${this.path}/${file.path}`
+          }));
+        } catch (e) {
+          console.error(e);
+          throw e;
+        }
       },
       default: null,
     }

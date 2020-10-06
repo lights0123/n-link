@@ -275,11 +275,11 @@ class Devices extends Vue implements GenericDevices {
         this.addToQueue(dev, {action: 'move', src, dest});
     }
 
-    uploadFiles(dev: DevId | string, path: string, files: File[]): Promise<void> {
+    uploadFiles(): Promise<void> {
         return Promise.resolve(undefined);
     }
 
-    uploadOsFile(dev: DevId | string, file: File): Promise<void> {
+    uploadOsFile(): Promise<void> {
         return Promise.resolve(undefined);
     }
 }
