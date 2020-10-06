@@ -93,4 +93,4 @@ jobs:
       - name: Build
         working-directory: ./web
         run: |
-          yarn generate
+          yarn workspace web run generate
