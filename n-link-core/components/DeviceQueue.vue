@@ -77,7 +77,7 @@ export default class FileView extends Vue {
     return this.device.queue.map(item => {
       let desc = '';
       if (item.action === 'download') desc = `Download ${trimPath(item.path[0])}`;
-      else if (item.action === 'upload') desc = `Upload ${trimPath(item.src)}`;
+      else if (item.action === 'upload') desc = `Upload ${'src' in item ? trimPath(item.src) : item.file.name}`;
       else if (item.action === 'uploadOs') desc = 'Upload OS';
       else if (item.action === 'deleteFile') desc = `Delete file ${item.path}`;
       else if (item.action === 'deleteDir') desc = `Delete directory ${item.path}`;

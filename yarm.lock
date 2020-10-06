@@ -940,9 +940,9 @@
     glob-to-regexp "^0.3.0"
 
 "@msgpack/msgpack@^2.1.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@msgpack/msgpack/-/msgpack-2.2.0.tgz#e8e3d22e3ad1843572ab2a3e22c9b398a320a901"
-  integrity sha512-ayqoys4TaD1mSjWmNj6E65yKsFMjAP21l825NwYe2cHLAvsZSNSVigVIcekhuYCRhoSLwBf5ysjFfcXnJ0NoUQ==
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@msgpack/msgpack/-/msgpack-2.1.0.tgz#ee9857abe70367b99d7ae673f980a96601fb0b2b"
+  integrity sha512-QE/mUcJHUS5kkWjU2a55OagQ8hUB8TrfxqaXLUuG6hyaDp1weToMz5ma0+bk2y+TFXKrhPu8bYaviTMESLo2/w==
 
 "@nodelib/fs.scandir@2.1.3":
   version "2.1.3"
@@ -1506,6 +1506,11 @@
   integrity sha512-xiTJn3bmDh1lA8c6iVJs4ZhHw+pcmxXlJQXOB6G1oULaak8rmarIeFKI4aTJ7849dEhaO612wgIualZfbxTJwA==
   dependencies:
     "@types/node" "*"
+
+"@types/color-name@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
+  integrity sha512-rr+OQyAjxze7GgWrSaJwydHStIhHq2lvY3BOC2Mj7KnzI7XK0Uw1TOOdI9lDoajEbSWLiYgoo4f1R51erQfhPQ==
 
 "@types/compression@^1.7.0":
   version "1.7.0"
@@ -2384,14 +2389,14 @@ acorn-walk@^7.0.0, acorn-walk@^7.1.1:
   integrity sha512-OPdCF6GsMIP+Az+aWfAAOEt2/+iVDKE7oy6lJ098aoe59oAmK76qV6Gw60SbZ8jHuG2wH058GF4pLFbYamYrVA==
 
 acorn@^6.4.1:
-  version "6.4.2"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-6.4.2.tgz#35866fd710528e92de10cf06016498e47e39e1e6"
-  integrity sha512-XtGIhXwF8YM8bJhGxG5kXgjkEuNGLTkoYqVE+KMR+aspr4KGYmKYg7yUe3KghyQ9yheNwLnjmzh/7+gfDBmHCQ==
+  version "6.4.1"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-6.4.1.tgz#531e58ba3f51b9dacb9a6646ca4debf5b14ca474"
+  integrity sha512-ZVA9k326Nwrj3Cj9jlh3wGFutC2ZornPNARZwsNYqQYgN0EsV2d53w5RN/co65Ohn4sUAUtb1rSUAOD6XN9idA==
 
 acorn@^7.0.0, acorn@^7.1.1, acorn@^7.4.0:
-  version "7.4.1"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-7.4.1.tgz#feaed255973d2e77555b83dbc08851a6c63520fa"
-  integrity sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==
+  version "7.4.0"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-7.4.0.tgz#e1ad486e6c54501634c6c397c5c121daa383607c"
+  integrity sha512-+G7P8jJmCHr+S+cLfQxygbWhXy+8YTVGzAkpEbcLo2mLoL7tij/VG41QSHACSf5QgYRhMZYHuNc6drJaO0Da+w==
 
 address@^1.1.2:
   version "1.1.2"
@@ -2493,10 +2498,11 @@ ansi-styles@^3.2.0, ansi-styles@^3.2.1:
     color-convert "^1.9.0"
 
 ansi-styles@^4.0.0, ansi-styles@^4.1.0, ansi-styles@^4.2.1:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-4.3.0.tgz#edd803628ae71c04c85ae7a0906edad34b648937"
-  integrity sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg==
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-4.2.1.tgz#90ae75c424d008d2624c5bf29ead3177ebfcf359"
+  integrity sha512-9VGjrMsG1vePxcSweQsN20KY/c4zN0h9fLjqAbwbPfahM3t+NL+M9HC8xeXG2I8pX5NoamTGNuomEUFI7fcUjA==
   dependencies:
+    "@types/color-name" "^1.1.1"
     color-convert "^2.0.1"
 
 any-promise@^1.0.0:
@@ -3385,9 +3391,9 @@ caniuse-api@^3.0.0:
     lodash.uniq "^4.5.0"
 
 caniuse-lite@^1.0.0, caniuse-lite@^1.0.30000981, caniuse-lite@^1.0.30001109, caniuse-lite@^1.0.30001133, caniuse-lite@^1.0.30001135:
-  version "1.0.30001143"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001143.tgz#560f2cfb9f313d1d7e52eb8dac0e4e36c8821c0d"
-  integrity sha512-p/PO5YbwmCpBJPxjOiKBvAlUPgF8dExhfEpnsH+ys4N/791WHrYrGg0cyHiAURl5hSbx5vIcjKmQAP6sHDYH3w==
+  version "1.0.30001142"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001142.tgz#a8518fdb5fee03ad95ac9f32a9a1e5999469c250"
+  integrity sha512-pDPpn9ankEpBFZXyCv2I4lh1v/ju+bqb78QfKf+w9XgDAFWBwSYPswXqprRdrgQWK0wQnpIbfwRjNHO1HWqvoQ==
 
 case-sensitive-paths-webpack-plugin@^2.3.0:
   version "2.3.0"
@@ -6022,6 +6028,7 @@ forever-agent@~0.6.1:
   integrity sha1-+8cfDEGt6zf5bFd60e1C2P2sypE=
 
 "fork-ts-checker-webpack-plugin-v5@npm:fork-ts-checker-webpack-plugin@^5.0.11", fork-ts-checker-webpack-plugin@^5.1.0, fork-ts-checker-webpack-plugin@^5.2.0:
+  name fork-ts-checker-webpack-plugin-v5
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/fork-ts-checker-webpack-plugin/-/fork-ts-checker-webpack-plugin-5.2.0.tgz#780a14fb0da02a892baedd7aa0d089a1eda7b3e5"
   integrity sha512-NEKcI0+osT5bBFZ1SFGzJMQETjQWZrSvMO1g0nAR/w0t328Z41eN8BJEIZyFCl2HsuiJpa9AN474Nh2qLVwGLQ==
@@ -9699,9 +9706,9 @@ postcss-attribute-case-insensitive@^4.0.1:
     postcss-selector-parser "^6.0.2"
 
 postcss-calc@^7.0.1:
-  version "7.0.5"
-  resolved "https://registry.yarnpkg.com/postcss-calc/-/postcss-calc-7.0.5.tgz#f8a6e99f12e619c2ebc23cf6c486fdc15860933e"
-  integrity sha512-1tKHutbGtLtEZF6PT4JSihCHfIVldU72mZ8SdZHIYriIZ9fh9k9aWSppaT8rHsyI3dX+KSR+W+Ix9BMY3AODrg==
+  version "7.0.4"
+  resolved "https://registry.yarnpkg.com/postcss-calc/-/postcss-calc-7.0.4.tgz#5e177ddb417341e6d4a193c5d9fd8ada79094f8b"
+  integrity sha512-0I79VRAd1UTkaHzY9w83P39YGO/M3bG7/tNLrHGEunBolfoGM0hSjrGvjoeaj0JE/zIw5GsI2KZ0UwDJqv5hjw==
   dependencies:
     postcss "^7.0.27"
     postcss-selector-parser "^6.0.2"
@@ -12618,9 +12625,9 @@ uglify-js@3.4.x:
     source-map "~0.6.1"
 
 uglify-js@^3.5.1, uglify-js@^3.7.4:
-  version "3.11.1"
-  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.11.1.tgz#32d274fea8aac333293044afd7f81409d5040d38"
-  integrity sha512-OApPSuJcxcnewwjSGGfWOjx3oix5XpmrK9Z2j0fTRlHGoZ49IU6kExfZTM0++fCArOOCet+vIfWwFHbvWqwp6g==
+  version "3.11.0"
+  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.11.0.tgz#67317658d76c21e0e54d3224aee2df4ee6c3e1dc"
+  integrity sha512-e1KQFRCpOxnrJsJVqDUCjURq+wXvIn7cK2sRAx9XL3HYLL9aezOP4Pb1+Y3/o693EPk111Yj2Q+IUXxcpHlygQ==
 
 unbzip2-stream@^1.0.9:
   version "1.4.3"
@@ -13101,11 +13108,6 @@ wcwidth@^1.0.1:
   integrity sha1-8LDc+RW8X/FSivrbLA4XtTLaL+g=
   dependencies:
     defaults "^1.0.3"
-
-web-libnspire@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/web-libnspire/-/web-libnspire-0.1.0.tgz#113d5cba1c00add557b18ceb3d85101df078aac0"
-  integrity sha512-pprvYj+NtmBpZKACGEetH93kMnGc9uGE23FaAIhePd1b27zifB4gkyWujjw1na0aHl8L82VKV6UeYQBITL2S0A==
 
 webidl-conversions@^5.0.0:
   version "5.0.0"

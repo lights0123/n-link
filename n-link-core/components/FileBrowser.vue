@@ -20,7 +20,7 @@
         </div>
       </div>
       <div class="overflow-auto h-full px-4 pt-4 w-48 flex-shrink-0 border-l">
-        <file-data :files="selected" :show-hidden="showHidden" :dev="dev" :path="path"/>
+        <file-data :files="selected" :show-hidden="showHidden" :dev="dev" :path="path" :native-upload="nativeUpload"/>
       </div>
     </div>
   </div>
@@ -51,6 +51,7 @@ import DeviceQueue from "./DeviceQueue.vue";
 export default class FileBrowser extends Vue {
   @Prop({type: String, required: true}) private dev!: string;
   @Prop({type: Boolean, default: false}) private showHidden!: boolean;
+  @Prop({type: Boolean, default: false}) private nativeUpload!: boolean;
   path = '';
   updateIndex = 0;
   selected: FileInfo[] = [];

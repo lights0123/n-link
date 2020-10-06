@@ -10,11 +10,11 @@
   },
   "dependencies": {
     "@tailwindcss/custom-forms": "^0.2.1",
-    "n-link-core": "0.0.0",
     "core-js": "^3.6.5",
     "element-ui": "^2.13.2",
     "feather-icons": "^4.28.0",
     "filesize": "^6.1.0",
+    "n-link-core": "0.0.0",
     "tauri": "^0.12.0",
     "vue": "^2.6.11",
     "vue-async-computed": "^3.9.0",
@@ -36,7 +36,7 @@
     "raw-loader": "^4.0.1",
     "sass": "^1.26.5",
     "sass-loader": "^8.0.2",
-    "typescript": "~3.9.3",
+    "typescript": "~4.0.3",
     "vue-cli-plugin-tailwind": "~1.5.0",
     "vue-cli-plugin-tauri": "~0.12.1",
     "vue-template-compiler": "^2.6.11"

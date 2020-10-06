@@ -24,9 +24,9 @@ export type FileInfo = { path: string; isDir: boolean; date: number; size: numbe
 
 export type Progress = { remaining: number; total: number };
 
-export type PartialCmd = { action: 'download'; path: [string, number]; dest: string }
-    | { action: 'upload'; path: string; src: string }
-    | { action: 'uploadOs'; src: string }
+export type PartialCmd = { action: 'download'; path: [string, number]; dest?: string }
+    | { action: 'upload'; path: string } & ({ src: string } | { file: File })
+    | { action: 'uploadOs' } & ({ src: string } | { file: File })
     | { action: 'deleteFile'; path: string }
     | { action: 'deleteDir'; path: string }
     | { action: 'createDir'; path: string }
@@ -47,8 +47,10 @@ export interface GenericDevices {
     close(dev: string): Promise<void>;
     update(dev: string): Promise<void>;
     listDir(dev: DevId | string, path: string): Promise<FileInfo[]>;
+    uploadFiles(dev: DevId | string, path: string, files: File[]): Promise<void>;
     promptUploadFiles(dev: DevId | string, path: string): Promise<void>;
     uploadOs(dev: DevId | string, filter: string): Promise<void>;
+    uploadOsFile(dev: DevId | string, file: File): Promise<void>;
     downloadFiles(dev: DevId | string, files: [string, number][]): Promise<void>;
     delete(dev: DevId | string, files: FileInfo[]): Promise<void>;
     createDir(dev: DevId | string, path: string): Promise<void>;

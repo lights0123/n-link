@@ -26,13 +26,16 @@
     <small class="block select-text">Boot2: {{ formatVersion(info.boot2_version) }}</small>
     <button class="mt-4 button" @click="refresh" :disabled="refreshing">
       <div class="flex">
-        <div v-if="refreshing" class="lds-dual-ring" />
+        <div v-if="refreshing" class="lds-dual-ring"/>
         Refresh
       </div>
     </button>
-    <button class="mt-4 button gray-button" @click="$devices.uploadOs(dev, info.os_extension.split('.').pop())">
+    <button class="mt-4 button gray-button"
+            @click="nativeUpload ? $refs.upload.click() : $devices.uploadOs(dev, info.os_extension.split('.').pop())">
       Upload OS
     </button>
+    <input v-if="nativeUpload" ref="upload" type="file" class="hidden" :accept="info.os_extension"
+           @change="uploadNative"/>
   </div>
 </template>
 
@@ -45,6 +48,7 @@ import fileSize from "filesize";
 export default class FileView extends Vue {
   @Prop({type: Object, required: true}) private info!: Info;
   @Prop({type: String, required: true}) private dev!: string;
+  @Prop({type: Boolean, default: false}) private nativeUpload!: boolean;
   refreshing = false;
 
   formatSize(size: number) {
@@ -59,10 +63,15 @@ export default class FileView extends Vue {
     this.refreshing = true;
     try {
       await this.$devices.update(this.dev);
-    } catch(e) {
+    } catch (e) {
       /* */
     }
     this.refreshing = false;
+  }
+
+  uploadNative(e: Event & { target: HTMLInputElement }) {
+    const file = e.target.files?.[0];
+    if (file) this.$devices.uploadOsFile(this.dev, file);
   }
 }
 </script>
@@ -74,10 +83,12 @@ export default class FileView extends Vue {
     cursor: not-allowed;
     opacity: 0.75;
   }
+
   &:focus {
     outline: none;
   }
 }
+
 .gray-button {
   @apply bg-gray-400 text-gray-800;
 }
@@ -90,6 +101,7 @@ export default class FileView extends Vue {
   height: 64px * $scale-factor * 0.8;
   transform: scale($scale-factor);
 }
+
 .lds-dual-ring:after {
   content: " ";
   display: block;

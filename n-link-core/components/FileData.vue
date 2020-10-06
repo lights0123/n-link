@@ -65,9 +65,10 @@
           </button>
         </form>
       </el-popover>
-      <button class="mt-4 button w-full" @click="$devices.promptUploadFiles(dev, path)">
+      <button class="mt-4 button w-full" @click="nativeUpload ? $refs.upload.click() : $devices.promptUploadFiles(dev, path)">
         Upload files
       </button>
+      <input v-if="nativeUpload" ref="upload" type="file" class="hidden" multiple accept=".tns" @change="uploadNative" />
     </div>
   </div>
 </template>
@@ -88,6 +89,7 @@ export default class FileData extends Vue {
   @Prop({type: String, required: true}) private path!: string;
   @Prop({type: Boolean, default: false}) private showHidden!: boolean;
   @Prop({type: String, required: true}) private dev!: string;
+  @Prop({type: Boolean, default: false}) private nativeUpload!: boolean;
   newName = '';
   renamePopup = false;
   deletePopup = false;
@@ -126,6 +128,10 @@ export default class FileData extends Vue {
       newPath.push(this.newName + (!this.showHidden && !this.files[0].isDir ? '.tns' : ''));
       this.$devices.move(this.dev, path, newPath.join('/'));
     }
+  }
+
+  uploadNative(e: Event & {target: HTMLInputElement}) {
+    this.$devices.uploadFiles(this.dev, this.path, [...(e.target.files || [])])
   }
 }
 </script>
