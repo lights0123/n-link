@@ -83,7 +83,7 @@ jobs:
             ${{ steps.yarn-cache-dir-path.outputs.dir }}
           key: ${{ matrix.platform }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ matrix.platform }}-yarn-
+            ubuntu-18.04-yarn-
       - name: setup node
         uses: actions/setup-node@v1
         with:
@@ -91,5 +91,6 @@ jobs:
       - name: install app dependencies
         run: yarn
       - name: Build
+        working-directory: ./web
         run: |
-          yarn workspace web run generate
+          yarn generate
