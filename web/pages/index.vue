@@ -109,6 +109,11 @@ function sleep(ms: number) {
 export default class Home extends Vue {
   selectedCalculator: string | null = null;
   showHidden = false;
+  webUSB = true;
+
+  mounted() {
+    this.webUSB = !!(navigator as any).usb;
+  }
 
   @Watch('$devices.hasEnumerated')
   onEnumerated() {
@@ -159,10 +164,6 @@ export default class Home extends Vue {
       this.selectedCalculator &&
       this.$devices.devices[this.selectedCalculator]?.needsDrivers
     );
-  }
-
-  get webUSB() {
-    return process.client ? !!(navigator as any).usb : true;
   }
 
   installDrivers() {
