@@ -1,26 +1,33 @@
 <template>
   <div class="home h-full overflow-hidden">
     <div class="flex flex-row h-full">
-      <div class="flex-shrink-0 border-r w-64">
-        <device-select :selected.sync="selectedCalculator" />
-        <div class="overflow-auto h-full px-4 py-4">
+      <div class="flex flex-col flex-shrink-0 border-r w-64">
+        <device-select
+          :selected.sync="selectedCalculator"
+          :class="webUSB || 'opacity-50 pointer-events-none'"
+        />
+        <div class="overflow-auto flex flex-col h-full px-4 py-4">
           <div v-if="needsDrivers">
             <h1 class="text-3xl">Drivers required</h1>
             <p>The WinUSB driver is required to use this device.</p>
             <p class="text-center mt-2">
-              <a href="#" class="text-blue-600" @click.prevent="installDrivers"
-                >See installation instructions</a
-              >
+              <a href="#" class="text-blue-600" @click.prevent="installDrivers">
+                See installation instructions
+              </a>
             </p>
           </div>
           <div
             v-else-if="calculator && !calculator.info"
-            class="flex items-center justify-center h-full"
+            class="flex items-center justify-center flex-grow"
           >
             <div class="lds-dual-ring" />
           </div>
           <div v-else-if="calculator && calculator.info">
-            <calc-info :info="calculator.info" :dev="selectedCalculator" native-upload />
+            <calc-info
+              :info="calculator.info"
+              :dev="selectedCalculator"
+              native-upload
+            />
             <label class="inline-flex items-center cursor-pointer mr-2 mt-4">
               <input
                 v-model="showHidden"
@@ -32,16 +39,49 @@
               >
             </label>
           </div>
+          <div v-if="!(calculator && !calculator.info)" class="flex-grow" />
+          <div class="mt-4 select-text">
+            <p>
+              <a
+                href="https://lights0123.com/n-link/"
+                target="_blank"
+                class="text-blue-600 underline"
+              >
+                N-Link</a
+              >
+              ©
+              <a
+                href="https://lights0123.com/"
+                target="_blank"
+                class="text-blue-600 underline"
+              >
+                Ben Schattinger</a
+              >
+            </p>
+            <p>Licensed under the GPL v3.0</p>
+          </div>
         </div>
       </div>
       <div class="w-full">
-        <div class="h-full">
+        <div v-if="webUSB" class="h-full">
           <file-browser
             v-if="calculator && calculator.info"
             :dev="selectedCalculator"
             :show-hidden="showHidden"
             native-upload
           />
+        </div>
+        <div
+          v-else
+          class="flex flex-col items-center justify-center h-full select-text"
+        >
+          <p class="text-3xl">Your browser doesn't support WebUSB</p>
+          <a
+            href="https://lights0123.com/n-link/"
+            class="text-xl text-blue-600 underline"
+          >
+            Check out the desktop version instead
+          </a>
         </div>
       </div>
     </div>
@@ -119,6 +159,10 @@ export default class Home extends Vue {
       this.selectedCalculator &&
       this.$devices.devices[this.selectedCalculator]?.needsDrivers
     );
+  }
+
+  get webUSB() {
+    return process.client ? !!(navigator as any).usb : true;
   }
 
   installDrivers() {
