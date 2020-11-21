@@ -127,6 +127,7 @@ fn progress_sender(total: u32) -> impl FnMut(usize) {
     }
 }
 
+
 fn err<T, E: std::fmt::Display>(res: Result<T, E>) -> Result<T, JsValue> {
     match res {
         Ok(c) => Ok(c),
