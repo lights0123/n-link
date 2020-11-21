@@ -1,0 +1,21 @@
+{
+  "name": "web-libnspire",
+  "collaborators": [
+    "lights0123 <developer@lights0123.com>"
+  ],
+  "description": "libnspire with WASM",
+  "version": "0.1.3",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lights0123/web-libusb"
+  },
+  "files": [
+    "web_libnspire_bg.wasm",
+    "web_libnspire.js",
+    "web_libnspire.d.ts"
+  ],
+  "module": "web_libnspire.js",
+  "types": "web_libnspire.d.ts",
+  "sideEffects": false
+}

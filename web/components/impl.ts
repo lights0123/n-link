@@ -154,7 +154,9 @@ export default class UsbCompat {
   }
 
   async processCmd(cmd: Cmd) {
+    console.log(cmd);
     const msg = await this._processCmd(cmd);
+    console.log(msg);
     const encoded = encoder.encode(msg);
 
     if (encoded.length > this.arr.length - 4) {

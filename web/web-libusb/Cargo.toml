@@ -1,0 +1,11 @@
+[workspace]
+members = ["web-libusb", "web-libnspire", "wasm-libc"]
+
+[profile.release]
+# Tell `rustc` to optimize for small code size.
+opt-level = "s"
+lto = true
+
+[patch.crates-io]
+libusb1-sys = { path = "web-libusb" }
+libc = { path = "wasm-libc" }

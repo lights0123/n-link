@@ -6,7 +6,7 @@ import type { Calculator } from 'web-libnspire';
 
 console.log('worker!');
 const ctx: Worker = self as any;
-const module = import('web-libnspire');
+const module = import('@/web-libusb/web-libnspire/pkg');
 let calc: Calculator | undefined;
 const rpcProvider = new RpcProvider((message, transfer: any) =>
   ctx.postMessage(message, transfer)
@@ -17,12 +17,19 @@ type Path = { path: string };
 type Data = { data: Uint8Array };
 type SrcDest = { src: string; dest: string };
 
+function log(...args: any) {
+  console.log('worker:', ...args);
+}
+
 rpcProvider.registerRpcHandler<{id: number, sab: SharedArrayBuffer, vid: number, pid: number}>('init', async ({ id, sab, vid, pid }) => {
   if (calc) calc.free();
+  log('init');
   calc = new (await module).Calculator(id, vid, pid, new Int32Array(sab));
+  log('init done');
 });
 
 rpcProvider.registerRpcHandler('updateDevice', async () => {
+  log('update');
   return calc?.update();
 });
 

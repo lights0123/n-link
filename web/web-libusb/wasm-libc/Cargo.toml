@@ -1,0 +1,10 @@
+[package]
+name = "libc"
+version = "0.2.78"
+authors = ["lights0123 <developer@lights0123.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+libc2 = { git = "https://github.com/rust-lang/libc", tag = "0.2.77", package = "libc" }
