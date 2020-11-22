@@ -36,10 +36,6 @@
     </button>
     <input v-if="nativeUpload" ref="upload" type="file" class="hidden" :accept="info.os_extension"
            @change="uploadNative"/>
-    <button class="mt-4 button gray-button"
-            @click="copyLogs">
-      Copy logs
-    </button>
   </div>
 </template>
 
@@ -76,10 +72,6 @@ export default class FileView extends Vue {
   uploadNative(e: Event & { target: HTMLInputElement }) {
     const file = e.target.files?.[0];
     if (file) this.$devices.uploadOsFile(this.dev, file);
-  }
-
-  copyLogs() {
-    navigator.clipboard.writeText(this.$devices.devices[this.dev].log).catch(alert);
   }
 }
 </script>

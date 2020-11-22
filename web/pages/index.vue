@@ -39,6 +39,11 @@
               >
             </label>
           </div>
+          <div v-if="calculator">
+            <button class="mt-4 button gray-button" @click="copyLogs">
+              Copy logs
+            </button>
+          </div>
           <div v-if="!(calculator && !calculator.info)" class="flex-grow" />
           <div class="mt-4 select-text">
             <p>
@@ -169,6 +174,10 @@ export default class Home extends Vue {
   installDrivers() {
     open('https://lights0123.com/n-link/#windows');
   }
+
+  copyLogs() {
+    navigator.clipboard.writeText(this.calculator?.log).catch(alert);
+  }
 }
 </script>
 
@@ -199,5 +208,21 @@ export default class Home extends Vue {
   100% {
     transform: rotate(360deg);
   }
+}
+
+.button {
+  @apply bg-blue-500 text-white rounded px-6 py-2.5 font-bold;
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.75;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.gray-button {
+  @apply bg-gray-400 text-gray-800;
 }
 </style>
