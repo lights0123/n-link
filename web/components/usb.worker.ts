@@ -4,7 +4,6 @@ import { RpcProvider } from 'worker-rpc';
 // eslint-disable-next-line import/no-absolute-path
 import type { Calculator } from 'web-libnspire';
 
-console.log('worker!');
 const ctx: Worker = self as any;
 const module = import('@/web-libusb/web-libnspire/pkg');
 let calc: Calculator | undefined;
@@ -13,6 +12,13 @@ const rpcProvider = new RpcProvider((message, transfer: any) =>
 );
 ctx.onmessage = (e) => rpcProvider.dispatch(e.data);
 
+const origLog = console.log;
+console.log = (...args: any[]) => {
+  origLog(...args);
+  rpcProvider.signal('log', args);
+};
+
+console.log('worker!');
 type Path = { path: string };
 type Data = { data: Uint8Array };
 type SrcDest = { src: string; dest: string };

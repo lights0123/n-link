@@ -11,8 +11,6 @@ const PID = 0xe012;
 /// The USB vendor ID used by all CX II calculators.
 const PID_CX2 = 0xe022;
 
-async function promisified(...a: any[]): Promise<any> {
-}
 
 type WorkerExt = Worker & { rpc: RpcProvider };
 export type Device = {
@@ -25,6 +23,7 @@ export type Device = {
   progress?: Progress;
   queue?: Cmd[];
   running?: boolean;
+  log: string;
 };
 
 async function downloadFile(
@@ -178,6 +177,7 @@ class Devices extends Vue implements GenericDevices {
         name: device.productName,
         isCxIi: device.productId === PID_CX2,
         needsDrivers: false,
+        log: '',
       } as Device);
     } catch (e) {
       console.error(e);
@@ -189,7 +189,10 @@ class Devices extends Vue implements GenericDevices {
     await device.open();
     const worker: Worker & Partial<WorkerExt> = new UsbWorker();
     const sab = new SharedArrayBuffer(10000);
-    const compat = new UsbCompat(sab);
+    const writeMessage = (messages: any[]) => {
+      this.devices[dev].log += messages.map(message => ['string', 'number'].includes(typeof message) ? message : JSON.stringify(message)).join(' ') + '\n';
+    };
+    const compat = new UsbCompat(sab, writeMessage);
     const id = compat.addDevice(device);
     const rpc = new RpcProvider((message, transfer: any) =>
       worker.postMessage(message, transfer)
@@ -203,6 +206,10 @@ class Devices extends Vue implements GenericDevices {
       }
       rpc.dispatch(data);
     };
+    rpc.registerSignalHandler('log', (messages: any[]) => {
+      console.log(messages.join(' '));
+      writeMessage(messages);
+    });
     this.$set(this.devices[dev], 'worker', worker as WorkerExt);
 
     await rpc.rpc('init', {id, sab, vid: device.vendorId, pid: device.productId});

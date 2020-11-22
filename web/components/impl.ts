@@ -85,9 +85,11 @@ let count = 0;
 export default class UsbCompat {
   devices: Record<number, USBDevice> = {};
   arr: SharedArrayBuffer;
+  log: (data: any[]) => void;
 
-  constructor(arr: SharedArrayBuffer) {
+  constructor(arr: SharedArrayBuffer, log: (data: any[]) => void) {
     this.arr = arr;
+    this.log = log;
   }
 
   addDevice(dev: USBDevice) {
@@ -154,8 +156,10 @@ export default class UsbCompat {
   }
 
   async processCmd(cmd: Cmd) {
+    this.log(['in:', cmd]);
     console.log(cmd);
     const msg = await this._processCmd(cmd);
+    this.log(['out:', msg]);
     console.log(msg);
     const encoded = encoder.encode(msg);
 
