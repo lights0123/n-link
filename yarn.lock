@@ -13155,10 +13155,10 @@ wcwidth@^1.0.1:
   dependencies:
     defaults "^1.0.3"
 
-web-libnspire@^0.1.3:
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/web-libnspire/-/web-libnspire-0.1.3.tgz#46a11dfdf4ac21f684964da4987079cc00211c14"
-  integrity sha512-pjs1JoJ7hj3mlZMfjwD98Pgm77iwbWqr4nCIvHYMPWZTZab/8uwJlo7363q8zS4xqDxrVBv6l/XaY6j8S/v8Fw==
+web-libnspire@^0.1.4:
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/web-libnspire/-/web-libnspire-0.1.4.tgz#3ceee8dc3640f33806269b7ee55f379cbe8c7f7a"
+  integrity sha512-N4e/G4HWWjz6cZDwxpKseU/tqZ2qY6+mz+9OPBmYgVQ7NEZ+4PPdFu4pl9aNd7vGo0DqbrEz87raVK84KgoLOA==
 
 webidl-conversions@^5.0.0:
   version "5.0.0"
