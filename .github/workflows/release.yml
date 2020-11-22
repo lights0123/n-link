@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: 12
       - name: get version
-        run: echo ::set-env name=PACKAGE_VERSION::$(node -p "require('./package.json').version")
+        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
       - name: create release
         id: create_release
         uses: actions/create-release@v1.1.0
