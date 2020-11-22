@@ -19,7 +19,7 @@ serde_bytes = "0.11"
 serde-wasm-bindgen = "0.1.3"
 rmp-serde = "0.14.4"
 libusb1-sys = "0.4.2"
-libnspire-sys = "0.3.2"
+libnspire-sys = "0.3.4"
 libnspire = "0.2.3"
 rusb = "0.6.4"
 
