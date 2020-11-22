@@ -116,7 +116,7 @@ class Devices extends Vue implements GenericDevices {
           await downloadFile(rpc, cmd.path);
         } else if (cmd.action === 'upload') {
           if (!('file' in cmd)) return;
-          await uploadFile(rpc, cmd.path + cmd.file.name, new Uint8Array(await cmd.file.arrayBuffer()));
+          await uploadFile(rpc, `${cmd.path}/${cmd.file.name}`, new Uint8Array(await cmd.file.arrayBuffer()));
         } else if (cmd.action === 'uploadOs') {
           if (!('file' in cmd)) return;
           await uploadOs(rpc, new Uint8Array(await cmd.file.arrayBuffer()));
