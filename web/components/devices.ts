@@ -198,7 +198,7 @@ class Devices extends Vue implements GenericDevices {
       worker.postMessage(message, transfer)
     );
     worker.rpc = rpc;
-    worker.onmessage = ({data}) => {
+    worker.onmessage = ({ data }) => {
       if ('usbCmd' in data) return compat.processCmd(data);
       if('total' in data) {
         this.$set(this.devices[dev], 'progress', data);
