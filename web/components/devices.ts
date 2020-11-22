@@ -207,7 +207,6 @@ class Devices extends Vue implements GenericDevices {
       rpc.dispatch(data);
     };
     rpc.registerSignalHandler('log', (messages: any[]) => {
-      console.log(messages.join(' '));
       writeMessage(messages);
     });
     this.$set(this.devices[dev], 'worker', worker as WorkerExt);

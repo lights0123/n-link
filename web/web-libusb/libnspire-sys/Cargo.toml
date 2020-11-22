@@ -1,0 +1,21 @@
+[package]
+name = "libnspire-sys"
+description = "low-level FFI bindings to libnspire for USB interaction with TI Nspire calculators"
+version = "0.3.3"
+authors = ["lights0123 <developer@lights0123.com>"]
+edition = "2018"
+build = "build.rs"
+links = "nspire"
+license = "GPL-3.0"
+readme = "README.md"
+repository = "https://github.com/lights0123/libnspire-rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+libusb1-sys = "0.4.1"
+
+[build-dependencies]
+cc = { version = "1.0", features = ["parallel"] }
+globwalk = "0.7"
+# bindgen = "0.55.1"

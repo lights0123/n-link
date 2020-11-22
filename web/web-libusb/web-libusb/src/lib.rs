@@ -179,7 +179,9 @@ pub unsafe extern "C" fn libusb_bulk_transfer(
         }) {
             Ok(reply) => match reply.0 {
                 Ok(size) => {
-                    *transferred = size as c_int;
+                    if !transferred.is_null() {
+                        *transferred = size as c_int;
+                    }
                     LIBUSB_SUCCESS
                 }
                 Err(e) => e.into(),
@@ -202,6 +204,9 @@ pub unsafe extern "C" fn libusb_bulk_transfer(
                     Ok(buf) => {
                         slice::from_raw_parts_mut(data, (buf.0).len().min(length as usize))
                             .copy_from_slice(buf.0);
+                        if !transferred.is_null() {
+                            *transferred = (buf.0).len() as c_int;
+                        }
                         LIBUSB_SUCCESS
                     }
                     Err(e) => e.into(),

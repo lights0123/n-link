@@ -31,3 +31,10 @@ console_error_panic_hook = { version = "0.1.6", optional = true }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.13"
+[package.metadata.wasm-pack.profile.dev.wasm-bindgen]
+# Should wasm-bindgen demangle the symbols in the "name" custom section?
+demangle-name-section = true
+# Should we emit the DWARF debug info custom sections?
+dwarf-debug-info = true
+[package.metadata.wasm-pack.profile.dev]
+wasm-opt = ['-g']

@@ -9,3 +9,4 @@ lto = true
 [patch.crates-io]
 libusb1-sys = { path = "web-libusb" }
 libc = { path = "wasm-libc" }
+libnspire-sys = { path = "libnspire-sys" }
