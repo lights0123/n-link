@@ -176,7 +176,7 @@ export default class Home extends Vue {
   }
 
   copyLogs() {
-    navigator.clipboard.writeText(this.calculator?.log).catch(alert);
+    navigator.clipboard.writeText((this.calculator as any)?.log).catch(alert);
   }
 }
 </script>
