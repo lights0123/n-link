@@ -202,10 +202,11 @@ pub unsafe extern "C" fn libusb_bulk_transfer(
             ) {
                 Ok(reply) => match reply.0 {
                     Ok(buf) => {
-                        slice::from_raw_parts_mut(data, (buf.0).len().min(length as usize))
+                        let len = (buf.0).len().min(length as usize);
+                        slice::from_raw_parts_mut(data, len)
                             .copy_from_slice(buf.0);
                         if !transferred.is_null() {
-                            *transferred = (buf.0).len() as c_int;
+                            *transferred = len as c_int;
                         }
                         LIBUSB_SUCCESS
                     }

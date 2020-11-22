@@ -64,6 +64,7 @@ int nspire_init(nspire_handle_t **ptr, libusb_device_handle *dev, bool is_cx2) {
 	return NSPIRE_ERR_SUCCESS;
 
 error_free_usb:
+    printf("err %d", ret);
 	usb_free_device(&h->device);
 error:
 	free(h);

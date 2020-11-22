@@ -35,6 +35,8 @@ pub fn to_write<'a>(w: &'a mut impl fmt::Write) -> impl FnMut(Argument) + 'a {
         Argument::Extra(d) => {w.write_str(&String::from_utf8_lossy(d));},
         Argument::Hex(len, data) => {write!(w, "{:#0width$x}", data, width=len as usize);},
         Argument::Int(data) => {write!(w, "{}", data);},
+        Argument::String(data) => {write!(w, "{}", data.to_string_lossy());},
+        Argument::Char(data) => {write!(w, "{}", data as char);},
         e => {dbg!(e);},
     }
 }

@@ -53,6 +53,7 @@ pub unsafe extern "C" fn printf(format: *const u8, mut args: ...) -> c_int {
     }
     let mut s = String::new();
     printf::func(format as _, args.as_va_list(), printf::to_write(&mut s));
+    s.trim_end();
     log(&s);
     0
 }
