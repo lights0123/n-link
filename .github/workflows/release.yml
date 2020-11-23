@@ -102,7 +102,7 @@ jobs:
 
             const {repo: {owner, repo}, sha} = context;
             console.log({owner, repo, sha});
-            const {name, version} = require(`${process.env.GITHUB_WORKSPACE}/package.json`);
+            const {name, version} = require(`${process.env.GITHUB_WORKSPACE}/desktop/package.json`);
             const arch = process.arch === 'x64' ? 'amd64' : process.arch;
 
             await github.repos.uploadReleaseAsset({
