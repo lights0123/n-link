@@ -16,8 +16,7 @@ jobs:
       - name: Install GNU tar
         if: runner.os == 'macOS'
         run: |
-          brew install gnu-tar
-          echo "::add-path::/usr/local/opt/gnu-tar/libexec/gnubin"
+          echo "/usr/local/opt/gnu-tar/libexec/gnubin" >> $GITHUB_PATH
       - name: setup node
         uses: actions/setup-node@v1
         with:
