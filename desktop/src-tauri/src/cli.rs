@@ -57,6 +57,16 @@ fn get_dev() -> Option<libnspire::Handle<rusb::GlobalContext>> {
     .map(|dev| libnspire::Handle::new(dev.open().unwrap()).unwrap())
 }
 
+pub fn cwd() -> PathBuf {
+  #[cfg(target_os = "linux")]
+  if std::env::var_os("APPIMAGE").is_some() && std::env::var_os("APPDIR").is_some() {
+    if let Some(cwd) = std::env::var_os("OWD") {
+      return cwd.into();
+    }
+  };
+  std::env::current_dir().expect("Couldn't get current directory")
+}
+
 pub fn run() -> bool {
   let opt: Opt = Opt::parse();
   if let Some(cmd) = opt.cmd {
@@ -65,7 +75,10 @@ pub fn run() -> bool {
         if let Some(handle) = get_dev() {
           for file in files {
             let mut buf = vec![];
-            File::open(&file).unwrap().read_to_end(&mut buf).unwrap();
+            File::open(cwd().join(&file))
+              .unwrap()
+              .read_to_end(&mut buf)
+              .unwrap();
             let name = file
               .file_name()
               .expect("Failed to get file name")
