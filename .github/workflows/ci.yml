@@ -38,7 +38,7 @@ jobs:
             ~/.cargo/git
             ~/.cargo/bin
             desktop/src-tauri/target
-          key: ${{ matrix.platform }}-cargo-v2-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ matrix.platform }}-cargo-v3-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ matrix.platform }}-cargo-
       - name: setup node
