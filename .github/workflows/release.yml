@@ -85,7 +85,7 @@ jobs:
         run: yarn
       - name: ensure cache is valid
         if: runner.os != 'Windows'
-        run: cargo check || rm -rf ~/.cargo/registry
+        run: cargo build --release || rm -rf ~/.cargo/registry
         working-directory: ./desktop/src-tauri
       - uses: tauri-apps/tauri-action@v0
         env:
