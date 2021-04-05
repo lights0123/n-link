@@ -83,6 +83,10 @@ jobs:
           sudo apt-get install -y webkit2gtk-4.0 squashfs-tools
       - name: install app dependencies
         run: yarn
+      - name: ensure cache is valid
+        if: runner.os != 'Windows'
+        run: cargo check || rm -rf ~/.cargo/registry
+        working-directory: ./desktop/src-tauri
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
