@@ -46,6 +46,9 @@ module.exports = {
           blockquote: 'var(--color-ui-blockquote)',
         },
       },
+      height: {
+        min: 'min-content',
+      },
     },
   },
   variants: {},
