@@ -18,5 +18,9 @@ module.exports = {
     'import/no-webpack-loader-syntax': 0,
     'require-await': 0,
     'unicorn/number-literal-case': 0,
+    'no-console':
+      process.env.NODE_ENV === 'production'
+        ? ['warn', { allow: ['warn', 'error'] }]
+        : 'off',
   },
 };
