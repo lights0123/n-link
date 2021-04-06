@@ -1,8 +1,10 @@
 <template>
   <div class="home h-full overflow-hidden">
+    <ErrorMessage ref="errorMessage" />
     <div class="flex flex-row h-full">
       <div class="flex flex-col flex-shrink-0 border-r w-64">
         <device-select
+          :scan-hint="webUSB"
           :selected.sync="selectedCalculator"
           :class="webUSB || 'opacity-50 pointer-events-none'"
         />
@@ -76,12 +78,14 @@
           class="flex flex-col items-center justify-center h-full select-text"
         >
           <p class="text-3xl">Your browser doesn't support WebUSB</p>
-          <a
-            href="https://lights0123.com/n-link/"
-            class="text-xl text-blue-600 underline"
-          >
-            Check out the desktop version instead
-          </a>
+          <p class="text-xl">
+            <a
+              href="https://lights0123.com/n-link/"
+              class="text-blue-600 underline inline"
+            >
+              Check out the desktop version instead</a
+            >, or switch to a Chrome-based browser
+          </p>
         </div>
       </div>
     </div>
@@ -89,11 +93,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'vue-property-decorator';
+import { Component, Vue, Watch, Ref } from 'vue-property-decorator';
 import CalcInfo from 'n-link-core/components/CalcInfo.vue';
 import FileBrowser from 'n-link-core/components/FileBrowser.vue';
 import DeviceSelect from 'n-link-core/components/DeviceSelect.vue';
 import '@/components/devices';
+import ErrorMessage from '@/components/ErrorMessage.vue';
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -101,6 +106,7 @@ function sleep(ms: number) {
 
 @Component({
   components: {
+    ErrorMessage,
     DeviceSelect,
     FileBrowser,
     CalcInfo,
@@ -110,6 +116,7 @@ export default class Home extends Vue {
   selectedCalculator: string | null = null;
   showHidden = false;
   webUSB = true;
+  @Ref() readonly errorMessage!: ErrorMessage;
 
   mounted() {
     this.webUSB = !!(navigator as any).usb;
@@ -147,7 +154,8 @@ export default class Home extends Vue {
       try {
         await this.$devices.open(dev);
       } catch (e) {
-        console.error(e);
+        console.error({ e });
+        this.errorMessage.handleError(e, 'connection');
         this.selectedCalculator = null;
       }
     }

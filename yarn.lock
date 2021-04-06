@@ -13017,6 +13017,13 @@ vue-eslint-parser@^7.0.0:
     esquery "^1.0.1"
     lodash "^4.17.15"
 
+vue-final-modal@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/vue-final-modal/-/vue-final-modal-2.1.0.tgz#6cb6820b37a4fb063ac3450d81f60c4153f07acf"
+  integrity sha512-QRZEVx6Omt2PVugIoz0k7URMJUB8bkoQ8dkROg1Ig5cXQTQaMiLonWnf/AaUHMmBh22HtG24LawwW9onv0FOZg==
+  dependencies:
+    vue "^2.6.12"
+
 vue-hot-reload-api@^2.3.0:
   version "2.3.4"
   resolved "https://registry.yarnpkg.com/vue-hot-reload-api/-/vue-hot-reload-api-2.3.4.tgz#532955cc1eb208a3d990b3a9f9a70574657e08f2"
@@ -13155,10 +13162,10 @@ wcwidth@^1.0.1:
   dependencies:
     defaults "^1.0.3"
 
-web-libnspire@^0.1.4:
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/web-libnspire/-/web-libnspire-0.1.4.tgz#3ceee8dc3640f33806269b7ee55f379cbe8c7f7a"
-  integrity sha512-N4e/G4HWWjz6cZDwxpKseU/tqZ2qY6+mz+9OPBmYgVQ7NEZ+4PPdFu4pl9aNd7vGo0DqbrEz87raVK84KgoLOA==
+web-libnspire@^0.1.5:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/web-libnspire/-/web-libnspire-0.1.5.tgz#9e7c518f594b3b11b6cba826bf89c757779fd04d"
+  integrity sha512-njGq7G6bol3DElbPbshxwRKq9gQa9G5XN+Lw+jCfD9bdmmk+vhn8XkR9B/ko/xU7AgamvWfilVx2bXGrVv45ig==
 
 webidl-conversions@^5.0.0:
   version "5.0.0"

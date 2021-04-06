@@ -10,14 +10,14 @@ export enum UsbError {
   Unknown = 'Unknown',
 }
 
-const exceptionMap = globalThis.DOMException
+const exceptionMap: Record<string, string> = globalThis.DOMException
   ? {
-      [DOMException.NOT_FOUND_ERR]: UsbError.NotFound,
-      [DOMException.SECURITY_ERR]: UsbError.Security,
-      [DOMException.NETWORK_ERR]: UsbError.Network,
-      [DOMException.ABORT_ERR]: UsbError.Abort,
-      [DOMException.INVALID_STATE_ERR]: UsbError.InvalidState,
-      [DOMException.INVALID_ACCESS_ERR]: UsbError.InvalidAccess,
+      NotFoundError: UsbError.NotFound,
+      SecurityError: UsbError.Security,
+      NetworkError: UsbError.Network,
+      AbortError: UsbError.Abort,
+      InvalidStateError: UsbError.InvalidState,
+      InvalidAccessError: UsbError.InvalidAccess,
     }
   : {};
 
@@ -85,6 +85,7 @@ let count = 0;
 export default class UsbCompat {
   devices: Record<number, USBDevice> = {};
   arr: SharedArrayBuffer;
+  lastError?: DOMException;
 
   constructor(arr: SharedArrayBuffer) {
     this.arr = arr;
@@ -149,7 +150,10 @@ export default class UsbCompat {
       return reply;
     } catch (e) {
       console.error(e);
-      return { Err: exceptionMap[e.name] || UsbError.Unknown };
+      this.lastError = e;
+      return {
+        Err: { [exceptionMap[e.name as string] || UsbError.Unknown]: null },
+      };
     }
   }
 

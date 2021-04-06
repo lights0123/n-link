@@ -40,6 +40,6 @@ export default {
 
   // Build Configuration (https://go.nuxtjs.dev/config-build)
   build: {
-    transpile: ['n-link-core', 'element-ui'],
+    transpile: ['n-link-core', 'element-ui', 'vue-final-modal'],
   },
 };

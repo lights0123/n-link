@@ -16,5 +16,7 @@ module.exports = {
   // add your custom rules here
   rules: {
     'import/no-webpack-loader-syntax': 0,
+    'require-await': 0,
+    'unicorn/number-literal-case': 0,
   },
 };

@@ -1,9 +1,14 @@
 <template>
   <div class="header border-b px-2 py-2 flex w-full">
-    <button @click="$devices.enumerate()" class="flex-shrink-0 mr-2 focus:outline-none" :class="$devices.enumerating && 'cursor-not-allowed opacity-25'" :disabled="$devices.enumerating">
-    <img src="~feather-icons/dist/icons/refresh-cw.svg" class="w-5"/>
+    <button @click="$devices.enumerate()" class="flex-shrink-0 mr-2 focus:outline-none"
+            :class="$devices.enumerating && 'cursor-not-allowed opacity-25'" :disabled="$devices.enumerating">
+      <img src="~feather-icons/dist/icons/refresh-cw.svg" class="w-5"/>
+      <div v-if="scanHint && Object.keys($devices.devices).length === 0" class="p-4 refresh-popup">
+        Click to connect a device
+      </div>
     </button>
-    <el-popover width="239" :visible-arrow="false" popper-class="focus:outline-none dev-select-pop" v-model="active" class="w-full overflow-hidden">
+    <el-popover width="239" :visible-arrow="false" popper-class="focus:outline-none dev-select-pop" v-model="active"
+                class="w-full overflow-hidden">
       <div slot="reference" class="relative w-full focus:outline-none">
         <div
             class="block w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-3/2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline h-8 truncate">
@@ -38,13 +43,14 @@
 </template>
 
 <script lang="ts">
-import {Component, PropSync, Vue} from 'vue-property-decorator';
+import {Component, Prop, PropSync, Vue} from 'vue-property-decorator';
 import ElPopover from 'element-ui/packages/popover/src/main.vue';
 import 'element-ui/lib/theme-chalk/popover.css';
 
 @Component({components: {ElPopover}})
 export default class DeviceSelect extends Vue {
   @PropSync('selected', {type: [String]}) selectedCalculator!: string | null;
+  @Prop({type: Boolean, default: false}) scanHint!: boolean;
   active = false;
 
   select(dev: string) {
@@ -65,6 +71,25 @@ export default class DeviceSelect extends Vue {
 <style scoped lang="scss">
 .header {
   height: 50px;
+}
+
+.refresh-popup {
+  $offset: 5px;
+  $size: 9px;
+  margin-left: -4.5px;
+  margin-top: 10px;
+  @apply absolute bg-blue-600 text-white;
+  &:before {
+    content: "";
+    position: absolute;
+    left: $offset;
+    top: $size * -2;
+    border-top: $size solid transparent;
+    border-right: $size solid transparent;
+    border-bottom: $size solid theme('colors.blue.600');
+
+    border-left: $size solid transparent;
+  }
 }
 </style>
 
