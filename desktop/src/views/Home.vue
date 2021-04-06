@@ -4,11 +4,19 @@
       <div class="flex-shrink-0 border-r w-64">
         <device-select :selected.sync="selectedCalculator"/>
         <div class="overflow-auto h-full px-4 py-4">
-          <div v-if="needsDrivers">
+          <div v-if="needsDrivers && !isLinux">
             <h1 class="text-3xl">Drivers required</h1>
             <p>The WinUSB driver is required to use this device.</p>
             <p class="text-center mt-2">
-              <a href="#" @click.prevent="installDrivers" class="text-blue-600">See installation instructions</a>
+              <a href="#" @click.prevent="installDrivers()" class="text-blue-600">See installation instructions</a>
+            </p>
+          </div>
+          <div v-else-if="needsDrivers && isLinux">
+            <h1 class="text-3xl">udev rules required</h1>
+            <p>udev rules are required to access this device.</p>
+            <p class="text-center mt-2">
+              <a href="#" @click.prevent="installDrivers('linux')" class="text-blue-600">See installation
+                instructions</a>
             </p>
           </div>
           <div v-else-if="calculator && !calculator.info" class="flex items-center justify-center h-full">
@@ -94,8 +102,12 @@ export default class Home extends Vue {
     return this.selectedCalculator && this.$devices.devices[this.selectedCalculator]?.needsDrivers;
   }
 
-  installDrivers() {
-    open('https://lights0123.com/n-link/#windows');
+  get isLinux() {
+    return navigator.platform.includes('Linux');
+  }
+
+  installDrivers(platform = 'windows') {
+    open(`https://lights0123.com/n-link/#${platform}`);
   }
 }
 </script>

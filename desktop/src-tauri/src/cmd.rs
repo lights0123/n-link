@@ -2,7 +2,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use libnspire::{PID, PID_CX2, VID};
-use rusb::{DeviceHandle, Error, GlobalContext};
+use rusb::GlobalContext;
 use serde::{Deserialize, Serialize};
 
 use crate::{Device, DeviceState};
@@ -162,7 +162,7 @@ pub fn add_device(dev: Arc<rusb::Device<GlobalContext>>) -> rusb::Result<((u8, u
       )?,
       false,
     ),
-    Err(rusb::Error::NotSupported) => (
+    Err(rusb::Error::NotSupported) | Err(rusb::Error::Access) => (
       if descriptor.product_id() == PID_CX2 {
         "TI-Nspire CX II"
       } else {
