@@ -93,6 +93,7 @@ class Devices extends Vue implements GenericDevices {
   enumerating = false;
   hasEnumerated = false;
   devices: Record<string, Device> = {};
+  errorHandler?: (e: DOMException) => void;
 
   created() {}
 
@@ -137,6 +138,7 @@ class Devices extends Vue implements GenericDevices {
         }
       } catch (e) {
         console.error(e);
+        this.errorHandler?.(e);
       }
       if ('progress' in device) this.$delete(device, 'progress');
       device.queue.shift();

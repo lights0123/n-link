@@ -41,6 +41,7 @@ export interface GenericDevices {
     devices: Record<string, Device>;
     enumerating: boolean;
     hasEnumerated: boolean;
+    errorHandler?: (e: DOMException) => void;
 
     enumerate(): Promise<void>;
     open(dev: string): Promise<void>;

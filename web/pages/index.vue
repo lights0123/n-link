@@ -93,7 +93,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch, Ref } from 'vue-property-decorator';
+import { Component, Ref, Vue, Watch } from 'vue-property-decorator';
 import CalcInfo from 'n-link-core/components/CalcInfo.vue';
 import FileBrowser from 'n-link-core/components/FileBrowser.vue';
 import DeviceSelect from 'n-link-core/components/DeviceSelect.vue';
@@ -120,6 +120,9 @@ export default class Home extends Vue {
 
   mounted() {
     this.webUSB = !!(navigator as any).usb;
+    this.$devices.errorHandler = (e: DOMException) => {
+      this.errorMessage.handleError(e, 'operation');
+    };
   }
 
   @Watch('$devices.hasEnumerated')
