@@ -46,14 +46,13 @@ fn get_dev() -> Option<libnspire::Handle<rusb::GlobalContext>> {
   rusb::devices()
     .unwrap()
     .iter()
-    .filter(|dev| {
+    .find(|dev| {
       let descriptor = match dev.device_descriptor() {
         Ok(d) => d,
         Err(_) => return false,
       };
       descriptor.vendor_id() == VID && matches!(descriptor.product_id(), PID | PID_CX2)
     })
-    .next()
     .map(|dev| libnspire::Handle::new(dev.open().unwrap()).unwrap())
 }
 

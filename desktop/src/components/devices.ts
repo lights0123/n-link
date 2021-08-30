@@ -1,5 +1,6 @@
-import {promisified} from 'tauri/api/tauri';
-import {listen} from 'tauri/api/event';
+import {invoke} from '@tauri-apps/api/tauri';
+import {listen} from '@tauri-apps/api/event';
+import {open as openDialog} from '@tauri-apps/api/dialog';
 import {Component, Vue} from 'vue-property-decorator';
 import type {GenericDevices} from 'n-link-core/components/devices';
 
@@ -55,47 +56,47 @@ export type Device = { name: string; isCxIi: boolean; needsDrivers: boolean; inf
 
 async function downloadFile(dev: DevId | string, path: [string, number], dest: string) {
     if (typeof dev === 'string') dev = stringToDev(dev);
-    await promisified({...dev, cmd: 'downloadFile', path, dest});
+    await invoke('download_file', {...dev, path, dest});
 }
 
 async function uploadFile(dev: DevId | string, path: string, src: string) {
     if (typeof dev === 'string') dev = stringToDev(dev);
-    await promisified({...dev, cmd: 'uploadFile', path, src});
+    await invoke('upload_file', {...dev, path, src});
 }
 
 async function uploadOs(dev: DevId | string, src: string) {
     if (typeof dev === 'string') dev = stringToDev(dev);
-    await promisified({...dev, cmd: 'uploadOs', src});
+    await invoke('upload_os', {...dev, src});
 }
 
 async function deleteFile(dev: DevId | string, path: string) {
     if (typeof dev === 'string') dev = stringToDev(dev);
-    await promisified({...dev, cmd: 'deleteFile', path});
+    await invoke('delete_file', {...dev, path});
 }
 
 async function deleteDir(dev: DevId | string, path: string) {
     if (typeof dev === 'string') dev = stringToDev(dev);
-    await promisified({...dev, cmd: 'deleteDir', path});
+    await invoke('delete_dir', {...dev, path});
 }
 
 async function createDir(dev: DevId | string, path: string) {
     if (typeof dev === 'string') dev = stringToDev(dev);
-    await promisified({...dev, cmd: 'createNspireDir', path});
+    await invoke('create_nspire_dir', {...dev, path});
 }
 
 async function move(dev: DevId | string, src: string, dest: string) {
     if (typeof dev === 'string') dev = stringToDev(dev);
-    await promisified({...dev, cmd: 'move', src, dest});
+    await invoke('move_file', {...dev, src, dest});
 }
 
 async function copy(dev: DevId | string, src: string, dest: string) {
     if (typeof dev === 'string') dev = stringToDev(dev);
-    await promisified({...dev, cmd: 'copy', src, dest});
+    await invoke('copy', {...dev, src, dest});
 }
 
 async function listDir(dev: DevId | string, path: string) {
     if (typeof dev === 'string') dev = stringToDev(dev);
-    return await promisified({...dev, cmd: 'listDir', path}) as FileInfo[];
+    return await invoke('list_dir', {...dev, path}) as FileInfo[];
 }
 
 async function listAll(dev: DevId | string, path: FileInfo): Promise<FileInfo[]> {
@@ -195,7 +196,7 @@ class Devices extends Vue implements GenericDevices {
     async enumerate() {
         this.enumerating = true;
         try {
-            for (const dev of await promisified({cmd: 'enumerate'}) as (Device & DevId)[]) {
+            for (const dev of await invoke('enumerate') as (Device & DevId)[]) {
                 this.$set(this.devices, devToString(dev as DevId), dev);
             }
         } finally {
@@ -205,19 +206,19 @@ class Devices extends Vue implements GenericDevices {
 
     async open(dev: DevId | string) {
         if (typeof dev === 'string') dev = stringToDev(dev);
-        const info = await promisified({...dev, cmd: 'openDevice'});
+        const info = await invoke('open_device', {...dev});
         this.$set(this.devices[devToString(dev)], 'info', info);
     }
 
     async close(dev: DevId | string) {
         if (typeof dev === 'string') dev = stringToDev(dev);
-        await promisified({...dev, cmd: 'closeDevice'});
+        await invoke('close_device', {...dev});
         this.$delete(this.devices[devToString(dev)], 'info');
     }
 
     async update(dev: DevId | string) {
         if (typeof dev === 'string') dev = stringToDev(dev);
-        const info = await promisified({...dev, cmd: 'updateDevice'});
+        const info = await invoke('update_device', {...dev});
         this.$set(this.devices[devToString(dev)], 'info', info);
     }
 
@@ -227,7 +228,7 @@ class Devices extends Vue implements GenericDevices {
 
     async promptUploadFiles(dev: DevId | string, path: string) {
         if (typeof dev !== 'string') dev = devToString(dev);
-        const files = await promisified({cmd: 'selectFiles', filter: ['tns']}) as string[];
+        const files = await openDialog({filters:[{extensions:['tns'], name:'TNS files'}], multiple: true});
         for (const src of files) {
             this.addToQueue(dev, {action: 'upload', path, src});
         }
@@ -235,14 +236,14 @@ class Devices extends Vue implements GenericDevices {
 
     async uploadOs(dev: DevId | string, filter: string) {
         if (typeof dev !== 'string') dev = devToString(dev);
-        const src = await promisified({cmd: 'selectFile', filter: [filter]}) as string | null;
+        const src = await openDialog({filters:[{extensions:[filter], name:'TI Nspire OS upgrade files'}]}) as string | null;
         if (!src) return;
         this.addToQueue(dev, {action: 'uploadOs', src});
     }
 
     async downloadFiles(dev: DevId | string, files: [string, number][]) {
         if (typeof dev !== 'string') dev = devToString(dev);
-        const dest = await promisified({cmd: 'selectFolder'}) as string | null;
+        const dest = await openDialog({directory: true}) as string | null;
         if (!dest) return;
         for (const path of files) {
             this.addToQueue(dev, {action: 'download', path, dest});

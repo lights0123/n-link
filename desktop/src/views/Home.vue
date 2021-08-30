@@ -42,7 +42,7 @@
 
 <script lang="ts">
 import {Component, Vue, Watch} from 'vue-property-decorator';
-import {open} from 'tauri/api/window';
+import {open} from '@tauri-apps/api/shell';
 import CalcInfo from 'n-link-core/components/CalcInfo.vue';
 import FileBrowser from 'n-link-core/components/FileBrowser.vue';
 import DeviceSelect from "n-link-core/components/DeviceSelect.vue";
