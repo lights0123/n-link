@@ -63,9 +63,12 @@ jobs:
           sudo apt-get install -y webkit2gtk-4.0 squashfs-tools
       - name: install app dependencies
         run: yarn
+      # https://github.com/tauri-apps/tauri-action/issues/162
+      - name: build app
+        run: cd desktop; yarn tauri:build
+      - name: fake yarn
+        run: node -e 'fs.writeFileSync("desktop/yarn.lock","")'
       - uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           npmScript: "tauri:build"
           projectPath: desktop/
