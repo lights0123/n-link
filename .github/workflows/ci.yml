@@ -67,7 +67,9 @@ jobs:
       - name: build app
         run: cd desktop; yarn tauri:build
       - name: fake yarn
-        run: node -e 'fs.writeFileSync("desktop/yarn.lock","")'
+        run: node -e "eval(process.env.COMMAND)"
+        env:
+          COMMAND: 'fs.writeFileSync("desktop/yarn.lock","")'
       - uses: tauri-apps/tauri-action@v0
         with:
           npmScript: "tauri:build"
