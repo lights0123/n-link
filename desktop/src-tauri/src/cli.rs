@@ -17,6 +17,9 @@ struct Opt {
 enum SubCommand {
   Upload(Upload),
   Download(Download),
+  UploadOS(UploadOS),
+  Copy(Copy),
+  Move(Move),
   Mkdir(Mkdir),
   Rmdir(Rmdir),
   Ls(Ls),
@@ -45,9 +48,42 @@ struct Download {
   dest: PathBuf,
 }
 
+/// Upload and install a .tct2 OS file
+#[derive(Clap, Debug)]
+struct UploadOS {
+  /// Path to the .tct2 OS file
+  #[clap(required = true, parse(from_os_str))]
+  file: PathBuf,
+}
+
+/// Copy a file to a different location
+#[derive(Clap, Debug)]
+struct Copy {
+  /// Path to file
+  #[clap(required = true)]
+  from_path: String,
+
+  /// Path to new location
+  #[clap(required = true)]
+  dist_path: String,
+}
+
+/// Move a file or directory to a new location
+#[derive(Clap, Debug)]
+struct Move {
+  /// Path to file
+  #[clap(required = true)]
+  from_path: String,
+
+  /// Path to new location
+  #[clap(required = true)]
+  dist_path: String,
+}
+
 /// Create a directory
 #[derive(Clap, Debug)]
 struct Mkdir {
+  /// Path to directory
   #[clap(required = true)]
   path: String,
 }
@@ -55,6 +91,7 @@ struct Mkdir {
 /// Delete a directory
 #[derive(Clap, Debug)]
 struct Rmdir {
+  /// Path to directory
   #[clap(required = true)]
   path: String,
 }
@@ -62,6 +99,7 @@ struct Rmdir {
 /// List the contents of a directory
 #[derive(Clap, Debug)]
 struct Ls {
+  /// Path to directory
   #[clap(required = true)]
   path: String,
 }
@@ -193,6 +231,69 @@ pub fn run() -> bool {
           eprintln!("Couldn't find any device");
         }
       }
+      SubCommand::UploadOS(UploadOS { file }) => {
+        if let Some(handle) = get_dev() {
+          let mut buf = vec![];
+          File::open(cwd().join(&file))
+            .unwrap()
+            .read_to_end(&mut buf)
+            .unwrap();
+
+          let name = file
+            .file_name()
+            .expect("Failed to get file name")
+            .to_string_lossy()
+            .to_string();
+
+          let bar = ProgressBar::new(buf.len() as u64);
+          bar.set_style(ProgressStyle::default_bar().template("{spinner:.green} {msg} [{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})"));
+          bar.set_message(&format!("Upload OS {}", name));
+          bar.enable_steady_tick(100);
+
+          let res = handle.send_os(&buf, &mut |remaining| {
+            bar.set_position((buf.len() - remaining) as u64);
+          });
+
+          match res {
+            Ok(_) => {
+              bar.finish();
+            }
+            Err(error) => {
+              bar.abandon_with_message(&format!("OS Upload failed: {}", error));
+            }
+          }
+        } else {
+          eprintln!("Couldn't find any device");
+        }
+      }
+      SubCommand::Copy(Copy { from_path, dist_path }) => {
+        if let Some(handle) = get_dev() {
+          match handle.copy_file(&from_path, &dist_path) {
+            Ok(_) => {
+              println!("Copy {} => {}: Ok", from_path, dist_path);
+            }
+            Err(error) => {
+              eprintln!("Failed to copy file or directory: {}", error);
+            }
+          }
+        } else {
+          eprintln!("Couldn't find any device");
+        }
+      }
+      SubCommand::Move(Move { from_path, dist_path }) => {
+        if let Some(handle) = get_dev() {
+          match handle.move_file(&from_path, &dist_path) {
+            Ok(_) => {
+              println!("Move {} => {}: Ok", from_path, dist_path);
+            }
+            Err(error) => {
+              eprintln!("Failed to move file or directory: {}", error);
+            }
+          }
+        } else {
+          eprintln!("Couldn't find any device");
+        }
+      }
       SubCommand::Mkdir(Mkdir { path }) => {
         if let Some(handle) = get_dev() {
           match handle.create_dir(&path) {
@@ -200,7 +301,7 @@ pub fn run() -> bool {
               println!("Create {}: Ok", path);
             }
             Err(error) => {
-              println!("Failed to create directory: {}", error);
+              eprintln!("Failed to create directory: {}", error);
             }
           }
         } else {
@@ -214,7 +315,7 @@ pub fn run() -> bool {
               println!("Remove {}: Ok", path);
             }
             Err(error) => {
-              println!("Failed to delete directory: {}", error);
+              eprintln!("Failed to delete directory: {}", error);
             }
           }
         } else {
