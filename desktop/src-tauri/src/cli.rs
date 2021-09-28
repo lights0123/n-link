@@ -100,17 +100,25 @@ pub fn run() -> bool {
               .to_string_lossy()
               .to_string();
             let bar = ProgressBar::new(buf.len() as u64);
-            bar.set_style(ProgressStyle::default_bar().template("{spinner:.green} {msg}[{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})"));
+            bar.set_style(ProgressStyle::default_bar().template("{spinner:.green} {msg} [{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})"));
             bar.set_message(&format!("Upload {}", name));
             bar.enable_steady_tick(100);
             if dest.ends_with('/') {
               dest.remove(dest.len() - 1);
             }
-            handle
+            let res = handle
               .write_file(&format!("{}/{}", dest, name), &buf, &mut |remaining| {
                 bar.set_position((buf.len() - remaining) as u64)
-              })
-              .unwrap();
+              });
+
+              match res {
+                Ok(_) => {
+                  println!("Upload {}: Ok", dest);
+                }
+                Err(error) => {
+                  bar.abandon_with_message(&format!("Failed: {}", error));
+                }
+              }
             bar.finish();
           }
         } else {
