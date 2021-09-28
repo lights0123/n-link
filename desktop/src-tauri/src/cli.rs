@@ -16,6 +16,8 @@ struct Opt {
 #[derive(Clap, Debug)]
 enum SubCommand {
   Upload(Upload),
+  Mkdir(Mkdir),
+  Rmdir(Rmdir),
   /// View license information
   License,
   // Download(Download),
@@ -29,6 +31,20 @@ struct Upload {
   files: Vec<PathBuf>,
   /// Destination path
   dest: String,
+}
+
+// Create a directory
+#[derive(Clap, Debug)]
+struct Mkdir {
+  #[clap(required = true)]
+  path: String
+}
+
+// Delete a directory
+#[derive(Clap, Debug)]
+struct Rmdir {
+  #[clap(required = true)]
+  path: String
 }
 
 // /// Download files from the calculator
@@ -96,6 +112,34 @@ pub fn run() -> bool {
               })
               .unwrap();
             bar.finish();
+          }
+        } else {
+          eprintln!("Couldn't find any device");
+        }
+      }
+      SubCommand::Mkdir(Mkdir { path }) => {
+        if let Some(handle) = get_dev() {
+          match handle.create_dir(&path) {
+            Ok(_) => {
+              println!("Create {}: Ok", path);
+            }
+            Err(error) => {
+              println!("Failed to create directory: {}", error);
+            }
+          }
+        } else {
+          eprintln!("Couldn't find any device");
+        }
+      }
+      SubCommand::Rmdir(Rmdir { path }) => {
+        if let Some(handle) = get_dev() {
+          match handle.delete_dir(&path) {
+            Ok(_) => {
+              println!("Remove {}: Ok", path);
+            }
+            Err(error) => {
+              println!("Failed to delete directory: {}", error);
+            }
           }
         } else {
           eprintln!("Couldn't find any device");
