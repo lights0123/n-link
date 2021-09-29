@@ -1,3 +1,4 @@
+use std::ffi::OsStr;
 use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::{fs::File, path::Path};
@@ -48,12 +49,16 @@ struct Download {
   dest: PathBuf,
 }
 
-/// Upload and install a .tct2 OS file
+/// Upload and install a .tcc/.tco/.tcc2/.tco2/.tct2 OS file
 #[derive(Clap, Debug)]
 struct UploadOS {
-  /// Path to the .tct2 OS file
+  /// Path to the OS file
   #[clap(required = true, parse(from_os_str))]
   file: PathBuf,
+
+  /// Disables the file extension check
+  #[clap(long)]
+  no_check_os: bool,
 }
 
 /// Copy a file to a different location
@@ -231,13 +236,40 @@ pub fn run() -> bool {
           eprintln!("Couldn't find any device");
         }
       }
-      SubCommand::UploadOS(UploadOS { file }) => {
+      SubCommand::UploadOS(UploadOS { file, no_check_os }) => {
         if let Some(handle) = get_dev() {
+          let calc_info = handle.info().expect("Failed to obtain device info");
+
+          let file_ext = file
+            .extension()
+            .unwrap_or(OsStr::new(""))
+            .to_string_lossy()
+            .to_string();
+
           let mut buf = vec![];
-          File::open(cwd().join(&file))
-            .unwrap()
-            .read_to_end(&mut buf)
-            .unwrap();
+          let mut f = File::open(cwd().join(&file))
+            .unwrap_or_else(|err| {
+              eprintln!("Failed to open file: {}", err);
+              std::process::exit(1);
+            });
+
+          if format!(".{}", file_ext) != calc_info.os_extension {
+            if no_check_os {
+              eprintln!(
+                "Warning: {} expects file of type {}",
+                calc_info.name, calc_info.os_extension
+              );
+            } else {
+              eprintln!(
+                "Error: {} expects file of type {}",
+                calc_info.name, calc_info.os_extension
+              );
+              eprintln!("Provide --no-check-os to bypass this check.");
+              std::process::exit(1);
+            }
+          }
+
+          f.read_to_end(&mut buf).unwrap();
 
           let name = file
             .file_name()
