@@ -163,13 +163,12 @@ pub fn run() -> bool {
 
             match res {
               Ok(_) => {
-                println!("Upload {}: Ok", dest);
+                bar.finish_with_message(&format!("Upload {}: Ok", dest));
               }
               Err(error) => {
                 bar.abandon_with_message(&format!("Failed: {}", error));
               }
             }
-            bar.finish();
           }
         } else {
           eprintln!("Couldn't find any device");
@@ -247,11 +246,10 @@ pub fn run() -> bool {
             .to_string();
 
           let mut buf = vec![];
-          let mut f = File::open(cwd().join(&file))
-            .unwrap_or_else(|err| {
-              eprintln!("Failed to open file: {}", err);
-              std::process::exit(1);
-            });
+          let mut f = File::open(cwd().join(&file)).unwrap_or_else(|err| {
+            eprintln!("Failed to open file: {}", err);
+            std::process::exit(1);
+          });
 
           if format!(".{}", file_ext) != calc_info.os_extension {
             if no_check_os {
@@ -298,7 +296,10 @@ pub fn run() -> bool {
           eprintln!("Couldn't find any device");
         }
       }
-      SubCommand::Copy(Copy { from_path, dist_path }) => {
+      SubCommand::Copy(Copy {
+        from_path,
+        dist_path,
+      }) => {
         if let Some(handle) = get_dev() {
           match handle.copy_file(&from_path, &dist_path) {
             Ok(_) => {
@@ -312,7 +313,10 @@ pub fn run() -> bool {
           eprintln!("Couldn't find any device");
         }
       }
-      SubCommand::Move(Move { from_path, dist_path }) => {
+      SubCommand::Move(Move {
+        from_path,
+        dist_path,
+      }) => {
         if let Some(handle) = get_dev() {
           match handle.move_file(&from_path, &dist_path) {
             Ok(_) => {
@@ -358,13 +362,16 @@ pub fn run() -> bool {
         if let Some(handle) = get_dev() {
           match handle.list_dir(&path) {
             Ok(dir_list) => {
-              for i in 0..dir_list.len() {
-                let item = dir_list.get(i).unwrap();
-                let mut item_name = String::from(item.name().to_str().unwrap());
-                if item.entry_type() == EntryType::Directory {
-                  item_name += "/";
-                }
-                println!("{}", item_name);
+              for item in dir_list.iter() {
+                println!(
+                  "{}{}",
+                  item.name().to_str().unwrap(),
+                  if item.entry_type() == EntryType::Directory {
+                    "/"
+                  } else {
+                    ""
+                  }
+                );
               }
             }
             Err(error) => {
