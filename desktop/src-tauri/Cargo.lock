@@ -1765,7 +1765,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tauri",
- "winres",
+ "tauri-build",
 ]
 
 [[package]]
@@ -3095,6 +3095,20 @@ dependencies = [
  "url",
  "uuid",
  "zip",
+]
+
+[[package]]
+name = "tauri-build"
+version = "1.0.0-beta.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3c9c9a9bea25b9d6f5845b8662e18447e17218f99860cab37e39e2b57a9fcd49"
+dependencies = [
+ "anyhow",
+ "proc-macro2",
+ "quote 1.0.9",
+ "serde_json",
+ "tauri-utils",
+ "winres",
 ]
 
 [[package]]
