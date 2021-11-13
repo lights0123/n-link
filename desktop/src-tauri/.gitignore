@@ -8,3 +8,5 @@ WixTools
 
 config.json
 bundle.json
+
+/.cargo
