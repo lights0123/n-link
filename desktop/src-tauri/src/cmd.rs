@@ -104,7 +104,7 @@ pub fn enumerate<R: Runtime>(handle: Window<R>) -> Result<Vec<AddDevice>, Serial
   )
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AddDevice {
   #[serde(flatten)]
@@ -114,7 +114,7 @@ pub struct AddDevice {
   pub needs_drivers: bool,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ProgressUpdate {
   #[serde(flatten)]

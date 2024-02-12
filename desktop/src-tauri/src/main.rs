@@ -15,7 +15,6 @@ use tauri::{Runtime, Window};
 
 use crate::cmd::{add_device, AddDevice, DevId, ProgressUpdate};
 
-mod cli;
 mod cmd;
 
 pub enum DeviceState {
@@ -434,9 +433,6 @@ mod invoked {
 }
 
 fn main() {
-  if cli::run() {
-    return;
-  }
   let has_registered_callback = AtomicBool::new(false);
   tauri::Builder::default()
     .on_page_load(move |window, _p| {
