@@ -14,12 +14,12 @@ anyhow = "1.0.32"
 serde_json = "1.0"
 libnspire = "0.2.2"
 lazy_static = "1.4.0"
-rusb = "0.6.4"
+rusb = "0.9"
 serde = { version = "1.0", features = [ "derive" ] }
 tauri = { version = "1.5.4", features = ["dialog-open", "shell-open"] }
 clap = "3.0.0-beta.2"
 indicatif = "0.15"
-libusb1-sys = { version = "0.4.2", features = [ "vendored" ] }
+libusb1-sys = { version = "0.6", features = [ "vendored" ] }
 hashbrown = "0.11"
 
 [build-dependencies]
