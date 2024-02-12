@@ -1,4 +1,7 @@
 {
+  "build": {
+    "beforeBuildCommand": "yarn run vue-cli-service build"
+  },
   "tauri": {
     "bundle": {
       "active": true,
