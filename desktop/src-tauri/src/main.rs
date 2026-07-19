@@ -9,6 +9,7 @@ use tauri::{Emitter, Manager, Runtime, WebviewWindow};
 
 use crate::device::{add_device, AddDevice, DevId, DEVICES};
 
+mod cli;
 mod commands;
 mod device;
 mod error;
@@ -81,6 +82,9 @@ impl<R: Runtime> Hotplug<GlobalContext> for DeviceMon<R> {
 }
 
 fn main() {
+  if cli::run() {
+    return;
+  }
   tauri::Builder::default()
     .plugin(tauri_plugin_dialog::init())
     .plugin(tauri_plugin_shell::init())
