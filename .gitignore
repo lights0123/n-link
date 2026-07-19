@@ -23,3 +23,9 @@ pnpm-debug.log*
 *.sw?
 
 *.tns
+.superpowers/
+
+# build artifacts
+node_modules/
+target/
+dist/

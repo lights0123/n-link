@@ -1,34 +1,25 @@
 [package]
 name = "n-link"
-version = "0.1.6"
-description = "Free, cross-platform, CX-II compatible computer linking program for the TI-Nspire"
-authors = [ "Ben Schattinger <developer@lights0123.com>" ]
-license = "GPL-3.0"
-repository = "https://github.com/lights0123/n-link"
-default-run = "n-link"
-edition = "2018"
-build = "src/build.rs"
+version = "0.1.0"
+description = "A Tauri App"
+authors = ["you"]
+edition = "2021"
 
-[dependencies]
-anyhow = "1.0.32"
-serde_json = "1.0"
-libnspire = "0.2.2"
-lazy_static = "1.4.0"
-rusb = "0.6.4"
-serde = { version = "1.0", features = [ "derive" ] }
-tauri = { version = "1.0.0-beta.8", features = ["dialog-open", "dialog-save", "notification-all", "shell-open"] }
-clap = "3.0.0-beta.2"
-indicatif = "0.15"
-libusb1-sys = { version = "0.4.2", features = [ "vendored" ] }
-hashbrown = "0.11"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "n_link_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-tauri-build = { version = "1.0.0-beta.4" }
+tauri-build = { version = "2", features = [] }
 
-[features]
-custom-protocol = [ "tauri/custom-protocol" ]
-default = [ "custom-protocol" ]
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 
-[[bin]]
-name = "n-link"
-path = "src/main.rs"
