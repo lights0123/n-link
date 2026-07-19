@@ -43,7 +43,7 @@ pub struct AddDevice {
   pub needs_drivers: bool,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ProgressUpdate {
   #[serde(flatten)]
