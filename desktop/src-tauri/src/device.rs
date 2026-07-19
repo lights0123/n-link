@@ -33,7 +33,7 @@ pub struct DevId {
   pub address: u8,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AddDevice {
   #[serde(flatten)]

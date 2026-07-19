@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "n-link",
-  "version": "0.1.0",
+  "version": "0.1.6",
   "identifier": "com.lights0123.n-link",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -12,13 +12,15 @@
   "app": {
     "windows": [
       {
-        "title": "n-link",
+        "title": "N-Link",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "resizable": true,
+        "fullscreen": false
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src blob: data: filesystem: ws: wss: http: https: tauri: 'unsafe-eval' 'unsafe-inline' 'self'; img-src 'self' asset: http://asset.localhost blob: data:"
     }
   },
   "bundle": {
@@ -30,6 +32,12 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "resources": [],
+    "externalBin": [],
+    "copyright": "Copyright (c) 2021 Ben Schattinger. Licensed under GPL-3.0",
+    "category": "Utility",
+    "shortDescription": "Free, cross-platform, CX-II compatible computer linking program for the TI-Nspire",
+    "longDescription": "Free, cross-platform, CX-II compatible computer linking program for the TI-Nspire"
   }
 }
