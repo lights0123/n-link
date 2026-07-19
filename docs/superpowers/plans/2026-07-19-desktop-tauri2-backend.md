@@ -22,6 +22,40 @@
 
 **Oracle binary:** `/home/jjureta/Projects/n-link/nlink-cli/target/release/n-link-cli`
 
+### AMENDMENT 2026-07-19: oracle unavailable
+
+Verified on this machine: `n-link-cli ls /` returns `Busy` and then hangs
+indefinitely (exit 124 at 45s, no output). Ruled out as causes: device-node
+permissions (ACL grants the user rw), the udev rule (present), and device
+disconnection (continuously enumerated).
+
+This is the known TI-Nspire CX II firmware issue described in
+`nlink-cli/README.md`. **The user has taken ownership of it and it is out of
+scope for Plan A.**
+
+Consequence for verification: any gate requiring a libnspire *data transfer*
+cannot pass and is downgraded to non-blocking. Specifically:
+
+| Gate | Status |
+|---|---|
+| Task 1 Step 5 (oracle baseline) | **Skipped** — cannot produce a listing |
+| Task 7 Step 3, `open_device` / `list_dir` | **Non-blocking** — expected to hang or return `Busy` |
+| Task 7 Step 4 (download + sha256 cross-check) | **Skipped entirely** |
+
+What Plan A must still prove, unchanged and fully achievable:
+
+1. A Tauri 2 window opens on webkit2gtk-4.1 — the actual goal of this port.
+2. The backend compiles and all 13 commands register.
+3. `enumerate` returns the CX II with correct camelCase keys. This reads only
+   USB descriptors via `rusb` and performs **no** libnspire transfer, so it is
+   unaffected by the `Busy` issue — and it exercises serde serialization, IPC,
+   and event wiring, which is the bulk of what this plan ports.
+4. Hotplug `addDevice` / `removeDevice` events fire.
+5. Headless `--help` works; deb and AppImage build, install, and render.
+
+A transfer-path failure at Task 7 is therefore **expected** and must not be
+treated as a port regression or a reason to halt.
+
 ---
 
 ### Task 1: Install system dependencies and confirm the toolchain
@@ -1429,8 +1463,8 @@ Ubuntu 26.04 — the failure mode that motivated this port."
 - [ ] A Tauri 2 window opens on Ubuntu 26.04 with webkit2gtk-4.1
 - [ ] All 13 commands are registered and callable from the webview
 - [ ] `enumerate` detects the CX II with correct camelCase payload keys
-- [ ] `list_dir /` output matches `n-link-cli ls /`
-- [ ] A downloaded file's sha256 matches the same file fetched by `n-link-cli`
+- [ ] ~~`list_dir /` output matches `n-link-cli ls /`~~ — **dropped**, see amendment
+- [ ] ~~Downloaded file sha256 matches `n-link-cli`~~ — **dropped**, see amendment
 - [ ] Hotplug add/remove events fire
 - [ ] Headless CLI mode still works
 - [ ] `.deb` and `.AppImage` build; the release binary renders without a blank screen
