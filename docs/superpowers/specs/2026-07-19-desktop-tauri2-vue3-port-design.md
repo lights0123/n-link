@@ -99,7 +99,7 @@ improvement to code being rewritten end-to-end anyway — not unrelated
 refactoring.
 
 The patched `vendor/libnspire-sys` (CX II NNSE handshake retry limit raised
-10 → 100) is wired via `[patch.crates-io]`, exactly as `nlink-cli` already does.
+10 → 30) is wired via `[patch.crates-io]`, exactly as `nlink-cli` already does.
 
 ## IPC contract — held invariant
 

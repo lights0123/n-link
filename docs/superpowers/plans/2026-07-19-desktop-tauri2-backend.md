@@ -15,7 +15,7 @@
 - Branch: `port/tauri2-vue3`. Do not commit to `main`.
 - Linux only. Bundle targets are exactly `["deb", "appimage"]`. Never add `msi` or `dmg`.
 - `web/` is **out of scope and knowingly broken**. Do not modify any file under `web/`.
-- `vendor/libnspire-sys` is wired via `[patch.crates-io]`. Its raised CX II NNSE handshake retry limit (10 → 100) is required; do not drop the patch or bump `libnspire-sys` past it.
+- `vendor/libnspire-sys` is wired via `[patch.crates-io]`. Its raised CX II NNSE handshake retry limit (10 → 30) is required; do not drop the patch or bump `libnspire-sys` past it.
 - The IPC contract is frozen. Command names, event names, and payload field names (camelCase via serde) must not change.
 - Do not commit `target/` or `node_modules/`.
 - No test framework is introduced. The spec approved **manual verification with `n-link-cli` as oracle**; verification steps below replace the usual TDD cycle. This is a deliberate, recorded decision, not an omission.
