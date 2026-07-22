@@ -2,7 +2,6 @@
   "private": true,
   "workspaces": [
     "desktop",
-    "n-link-core",
-    "web"
+    "n-link-core"
   ]
 }
