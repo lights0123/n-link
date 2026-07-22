@@ -59,9 +59,20 @@ export interface GenericDevices {
     move(dev: DevId | string, src: string, dest: string): Promise<void>;
 }
 
-declare module 'vue/types/vue' {
-    // 3. Declare augmentation for Vue
-    interface Vue {
+import type { InjectionKey } from 'vue';
+
+/**
+ * n-link-core is consumed by more than one host (the Tauri desktop app and
+ * the WebUSB web app), each of which supplies its own GenericDevices
+ * implementation. Core components must therefore never import a concrete
+ * store — they inject this key. The host provides it at startup.
+ */
+export const DEVICES_KEY = Symbol('devices') as InjectionKey<GenericDevices>;
+
+declare module 'vue' {
+    interface ComponentCustomProperties {
         $devices: GenericDevices;
     }
 }
+
+export {};

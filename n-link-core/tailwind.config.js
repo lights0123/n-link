@@ -1,8 +1,4 @@
 module.exports = {
-  future: {
-    purgeLayersByDefault: true,
-    removeDeprecatedGapUtilities: true,
-  },
   theme: {
     fontFamily: {
       sans: [
@@ -51,17 +47,5 @@ module.exports = {
       },
     },
   },
-  variants: {},
-  plugins: [require('@tailwindcss/custom-forms')],
-  purge: process.env.npm_package_name === 'web' && {
-    enabled: process.env.NODE_ENV === 'production',
-    content: [
-      'components/**/*.vue',
-      'layouts/**/*.vue',
-      'pages/**/*.vue',
-      'plugins/**/*.js',
-      'nuxt.config.js',
-      '../n-link-core/components/**/*.vue'
-    ]
-  },
+  plugins: [require('@tailwindcss/forms')],
 };
