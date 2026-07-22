@@ -31,7 +31,7 @@
       </div>
     </button>
     <button class="mt-4 button gray-button"
-            @click="nativeUpload ? upload?.click() : $devices.uploadOs(dev, info.os_extension.split('.').pop())">
+            @click="nativeUpload ? upload?.click() : $devices.uploadOs(dev, osExtension)">
       Upload OS
     </button>
     <input v-if="nativeUpload" ref="upload" type="file" class="hidden" :accept="info.os_extension"
@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import {inject, ref} from 'vue';
+import {computed, inject, ref} from 'vue';
 import {DEVICES_KEY, type GenericDevices, type Info, type Version} from './devices';
 import {filesize} from 'filesize';
 
@@ -55,6 +55,10 @@ const props = withDefaults(defineProps<{
 const devices = inject(DEVICES_KEY) as GenericDevices;
 
 const refreshing = ref(false);
+
+// `.split('.').pop()` is string | undefined; uploadOs takes a string. The
+// extension is always present in practice (e.g. ".tcc2"), so fall back to ''.
+const osExtension = computed(() => props.info.os_extension.split('.').pop() ?? '');
 const upload = ref<HTMLInputElement | null>(null);
 
 function formatSize(size: number) {
@@ -75,8 +79,8 @@ async function refresh() {
   refreshing.value = false;
 }
 
-function uploadNative(e: Event & { target: HTMLInputElement }) {
-  const file = e.target.files?.[0];
+function uploadNative(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0];
   if (file) devices.uploadOsFile(props.dev, file);
 }
 </script>
