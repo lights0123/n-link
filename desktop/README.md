@@ -40,12 +40,17 @@ done
 Run from the **repository root** (this is a workspace member):
 
 ```bash
-npm install --workspace desktop --legacy-peer-deps
+npm install
 ```
 
-`--legacy-peer-deps` is currently required: the sibling `n-link-core` package is
-still on Vue 2 and its peer ranges conflict. It can be dropped once `n-link-core`
-is ported to Vue 3.
+`--legacy-peer-deps` is no longer needed — `n-link-core` is on Vue 3 as of the
+frontend port.
+
+Note that the root `package.json` workspaces list contains only `desktop` and
+`n-link-core`. `web/` is deliberately excluded: it is still on Nuxt 2 and pulls
+`tailwindcss@1.9.6`, which npm hoists to the root and which then shadows the
+`tailwindcss@3` that `desktop` and `@tailwindcss/forms` require. Restore the
+entry when `web` is migrated.
 
 ## Development
 
