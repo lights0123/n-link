@@ -5,7 +5,7 @@
         <li v-for="(part, i) in parts" :key="i" class="" :class="{active: i === parts.length - 1}">
           <span class="inline-block cursor-pointer bg-gray-200 px-4 py-1 rounded-full"
                 @click="goToIndex(i)">{{ part || 'Home' }}</span>
-          <img v-if="i < parts.length - 1" class="inline img-fix" src="~feather-icons/dist/icons/chevron-right.svg"/>
+          <img v-if="i < parts.length - 1" class="inline img-fix" :src="chevronRight"/>
         </li>
       </ol>
       <div class="flex-grow"/>
@@ -26,59 +26,59 @@
   </div>
 </template>
 
-<script lang="ts">
-import {Component, Prop, Vue, Watch} from 'vue-property-decorator';
+<script setup lang="ts">
+import {computed, inject, ref, watch} from 'vue';
 import FileView from './FileView.vue';
-import type {FileInfo} from "./devices";
-import FileData from "./FileData.vue";
-import DeviceQueue from "./DeviceQueue.vue";
+import {DEVICES_KEY, type GenericDevices, type FileInfo} from './devices';
+import FileData from './FileData.vue';
+import DeviceQueue from './DeviceQueue.vue';
+import chevronRight from 'feather-icons/dist/icons/chevron-right.svg';
 
-@Component({
-  asyncComputed: {
-    files: {
-      async get(this: FileBrowser) {
-        try {
-          this.updateIndex;
-          return (await this.$devices.listDir(this.dev, this.path)).map(file => ({
-            ...file,
-            path: `${this.path}/${file.path}`
-          }));
-        } catch (e) {
-          console.error(e);
-          throw e;
-        }
-      },
-      default: null,
-    }
-  },
-  components: {DeviceQueue, FileData, FileView}
-})
-export default class FileBrowser extends Vue {
-  @Prop({type: String, required: true}) private dev!: string;
-  @Prop({type: Boolean, default: false}) private showHidden!: boolean;
-  @Prop({type: Boolean, default: false}) private nativeUpload!: boolean;
-  path = '';
-  updateIndex = 0;
-  selected: FileInfo[] = [];
-  files!: FileInfo[] | null;
+const devices = inject(DEVICES_KEY) as GenericDevices;
 
-  @Watch('path')
-  onPathChange() {
-    this.selected = [];
+const props = withDefaults(defineProps<{
+  dev: string;
+  showHidden?: boolean;
+  nativeUpload?: boolean;
+}>(), {
+  showHidden: false,
+  nativeUpload: false,
+});
+
+const path = ref('');
+const updateIndex = ref(0);
+const selected = ref<FileInfo[]>([]);
+
+const files = ref<FileInfo[] | null>(null);
+const loading = ref(false);
+
+async function loadFiles() {
+  loading.value = true;
+  try {
+    const contents = await devices.listDir(props.dev, path.value);
+    files.value = contents.map((file) => ({
+      ...file,
+      path: `${path.value}/${file.path}`,
+    }));
+  } catch (e) {
+    console.error(e);
+    files.value = null;
+  } finally {
+    loading.value = false;
   }
+}
 
-  get parts() {
-    return this.path.split('/');
-  }
+watch([() => props.dev, path, updateIndex], loadFiles, {immediate: true});
 
-  get loading() {
-    return this.$asyncComputed.files.updating;
-  }
+watch(path, () => {
+  selected.value = [];
+});
 
-  goToIndex(i: number) {
-    this.path = this.parts.slice(0, i + 1).join('/');
-    this.updateIndex++;
-  }
+const parts = computed(() => path.value.split('/'));
+
+function goToIndex(i: number) {
+  path.value = parts.value.slice(0, i + 1).join('/');
+  updateIndex.value++;
 }
 </script>
 
