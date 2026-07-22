@@ -52,8 +52,10 @@ const selected = ref<FileInfo[]>([]);
 const files = ref<FileInfo[] | null>(null);
 const loading = ref(false);
 
-async function loadFiles() {
-  loading.value = true;
+// `silent` keeps the current listing on screen while re-fetching, so the
+// refresh after a queued operation doesn't flash the loading spinner.
+async function loadFiles(silent = false) {
+  if (!silent) loading.value = true;
   try {
     const contents = await devices.listDir(props.dev, path.value);
     files.value = contents.map((file) => ({
@@ -62,13 +64,27 @@ async function loadFiles() {
     }));
   } catch (e) {
     console.error(e);
-    files.value = null;
+    if (!silent) files.value = null;
   } finally {
     loading.value = false;
   }
 }
 
-watch([() => props.dev, path, updateIndex], loadFiles, {immediate: true});
+watch([() => props.dev, path, updateIndex], () => loadFiles(), {immediate: true});
+
+// File operations (upload, delete, rename, create directory) are pushed onto
+// the device's command queue and run asynchronously, so the listing on screen
+// is stale by the time they finish. Re-list once the queue drains.
+const busy = computed(() => {
+  const device = devices.devices[props.dev];
+  if (!device) return false;
+  return !!device.running || !!device.queue?.length;
+});
+
+watch(busy, (isBusy, wasBusy) => {
+  // FileView resets its own selection when the new listing arrives.
+  if (wasBusy && !isBusy) loadFiles(true);
+});
 
 watch(path, () => {
   selected.value = [];
