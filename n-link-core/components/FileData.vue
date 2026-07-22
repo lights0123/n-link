@@ -11,7 +11,7 @@
       </button>
       <el-popover
           width="190"
-          popper-class="focus:outline-none" @show="newName = formatPath(files[0])" v-model="renamePopup">
+          popper-class="focus:outline-none" @show="newName = formatPath(files[0])" v-model:visible="renamePopup">
         <form @submit.prevent="rename">
           <input v-model="newName"
                  class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -21,9 +21,11 @@
             Rename
           </button>
         </form>
-        <button slot="reference" class="mt-4 button w-full">
-          Rename
-        </button>
+        <template #reference>
+          <button class="mt-4 button w-full">
+            Rename
+          </button>
+        </template>
       </el-popover>
     </div>
     <div v-else-if="files.length && files.every(file => !file.isDir)">
@@ -32,7 +34,7 @@
       </button>
     </div>
     <div v-if="files.length">
-      <el-popover width="170" popper-class="focus:outline-none" v-model="deletePopup">
+      <el-popover width="170" popper-class="focus:outline-none" v-model:visible="deletePopup">
         <div>
           Delete {{ files.length }} file{{ files.length === 1 ? '' : 's' }}?
           <div class="flex w-full justify-between">
@@ -44,17 +46,21 @@
             </button>
           </div>
         </div>
-        <button slot="reference" class="mt-4 button danger w-full">
-          Delete {{ files.length > 1 ? `${files.length} files` : '' }}
-        </button>
+        <template #reference>
+          <button class="mt-4 button danger w-full">
+            Delete {{ files.length > 1 ? `${files.length} files` : '' }}
+          </button>
+        </template>
       </el-popover>
     </div>
     <div class="flex-grow"/>
     <div class="pb-4">
-      <el-popover width="170" popper-class="focus:outline-none" v-model="createDirPopup" @show="newName = ''">
-        <button slot="reference" class="mt-4 button w-full text-sm">
-          Create directory
-        </button>
+      <el-popover width="170" popper-class="focus:outline-none" v-model:visible="createDirPopup" @show="newName = ''">
+        <template #reference>
+          <button class="mt-4 button w-full text-sm">
+            Create directory
+          </button>
+        </template>
         <form @submit.prevent="$devices.createDir(dev, `${path}/${newName}`)">
           <input v-model="newName"
                  class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -65,7 +71,7 @@
           </button>
         </form>
       </el-popover>
-      <button class="mt-4 button w-full" @click="nativeUpload ? $refs.upload.click() : $devices.promptUploadFiles(dev, path)">
+      <button class="mt-4 button w-full" @click="nativeUpload ? upload?.click() : $devices.promptUploadFiles(dev, path)">
         Upload files
       </button>
       <input v-if="nativeUpload" ref="upload" type="file" class="hidden" multiple accept=".tns" @change="uploadNative" />
@@ -73,66 +79,71 @@
   </div>
 </template>
 
-<script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator';
-import ElPopover from 'element-ui/packages/popover/src/main.vue';
-import 'element-ui/lib/theme-chalk/popover.css';
-import fileSize from "filesize";
-import type {FileInfo} from './devices';
-import FileIcon from "./FileIcon.vue";
+<script setup lang="ts">
+import { computed, inject, ref } from 'vue';
+import { ElPopover } from 'element-plus';
+import 'element-plus/es/components/popover/style/css';
+import { DEVICES_KEY, type GenericDevices, type FileInfo } from './devices';
+import { filesize } from 'filesize';
+import FileIcon from './FileIcon.vue';
 
-@Component({
-  components: {FileIcon, ElPopover}
-})
-export default class FileData extends Vue {
-  @Prop({type: Array, default: () => ([])}) private files!: FileInfo[];
-  @Prop({type: String, required: true}) private path!: string;
-  @Prop({type: Boolean, default: false}) private showHidden!: boolean;
-  @Prop({type: String, required: true}) private dev!: string;
-  @Prop({type: Boolean, default: false}) private nativeUpload!: boolean;
-  newName = '';
-  renamePopup = false;
-  deletePopup = false;
-  createDirPopup = false;
+const devices = inject(DEVICES_KEY) as GenericDevices;
 
-  formatSize(size: number) {
-    return fileSize(size, {round: 1});
+const props = withDefaults(defineProps<{
+  files: FileInfo[];
+  dev: string;
+  path: string;
+  showHidden?: boolean;
+  nativeUpload?: boolean;
+}>(), {
+  showHidden: false,
+  nativeUpload: false,
+});
+
+const newName = ref('');
+const renamePopup = ref(false);
+const deletePopup = ref(false);
+const createDirPopup = ref(false);
+const upload = ref<HTMLInputElement | null>(null);
+
+function formatSize(size: number) {
+  return filesize(size, {round: 1});
+}
+
+function formatPath({path, isDir}: FileInfo) {
+  const name = path.split('/').pop() as string;
+  if (props.showHidden || isDir) return name;
+  return name.substring(0, name.length - 4);
+}
+
+function download() {
+  devices.downloadFiles(props.dev, props.files.map(file => [file.path, file.size]));
+}
+
+function deleteFiles() {
+  deletePopup.value = false;
+  devices.delete(props.dev, props.files);
+}
+
+const isValidName = computed(() => {
+  if (props.showHidden && !props.files[0]?.isDir && !newName.value.endsWith('.tns')) return false;
+  return newName.value.length > 0 && !newName.value.includes('/');
+});
+
+function rename() {
+  if (isValidName.value) {
+    renamePopup.value = false;
+    const path = props.files[0].path;
+    const newPath = path.split('/');
+    newPath.pop();
+    newPath.push(newName.value + (!props.showHidden && !props.files[0].isDir ? '.tns' : ''));
+    devices.move(props.dev, path, newPath.join('/'));
   }
+}
 
-  formatPath({path, isDir}: FileInfo) {
-    const name = path.split('/').pop() as string;
-    if (this.showHidden || isDir) return name;
-    return name.substring(0, name.length - 4);
-  }
-
-  download() {
-    this.$devices.downloadFiles(this.dev, this.files.map(file => [file.path, file.size]));
-  }
-
-  deleteFiles() {
-    this.deletePopup = false;
-    this.$devices.delete(this.dev, this.files);
-  }
-
-  get isValidName() {
-    if (this.showHidden && !this.files[0]?.isDir && !this.newName.endsWith('.tns')) return false;
-    return this.newName.length && !this.newName.includes('/');
-  }
-
-  rename() {
-    if (this.isValidName) {
-      this.renamePopup = false;
-      const path = this.files[0].path;
-      const newPath = path.split('/');
-      newPath.pop();
-      newPath.push(this.newName + (!this.showHidden && !this.files[0].isDir ? '.tns' : ''));
-      this.$devices.move(this.dev, path, newPath.join('/'));
-    }
-  }
-
-  uploadNative(e: Event & {target: HTMLInputElement}) {
-    this.$devices.uploadFiles(this.dev, this.path, [...(e.target.files || [])])
-  }
+function uploadNative(e: Event) {
+  const files = (e.target as HTMLInputElement).files;
+  devices.uploadFiles(props.dev, props.path, [...(files || [])]);
 }
 </script>
 
