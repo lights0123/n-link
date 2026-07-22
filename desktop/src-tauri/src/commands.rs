@@ -122,25 +122,32 @@ pub fn enumerate<R: Runtime>(window: WebviewWindow<R>) -> Result<Vec<AddDevice>,
 }
 
 #[tauri::command]
-pub fn open_device(bus_number: u8, address: u8) -> Result<impl Serialize, SerializedError> {
-  let device = if let Some(dev) = DEVICES.read().unwrap().get(&(bus_number, address)) {
-    if !matches!(dev.state, DeviceState::Closed) {
-      return Err("Already open".into());
+pub async fn open_device(
+  bus_number: u8,
+  address: u8,
+) -> Result<libnspire::info::Info, SerializedError> {
+  tauri::async_runtime::spawn_blocking(move || {
+    let device = if let Some(dev) = DEVICES.read().unwrap().get(&(bus_number, address)) {
+      if !matches!(dev.state, DeviceState::Closed) {
+        return Err("Already open".into());
+      };
+      dev.device.clone()
+    } else {
+      return Err("Failed to find device".into());
     };
-    dev.device.clone()
-  } else {
-    return Err("Failed to find device".into());
-  };
-  let handle = libnspire::Handle::new(device.open()?)?;
-  let info = handle.info()?;
-  {
-    let mut guard = DEVICES.write().unwrap();
-    let device = guard
-      .get_mut(&(bus_number, address))
-      .ok_or_else(|| anyhow::anyhow!("Device lost"))?;
-    device.state = DeviceState::Open(Arc::new(std::sync::Mutex::new(handle)), info.clone());
-  }
-  Ok(info)
+    let handle = libnspire::Handle::new(device.open()?)?;
+    let info = handle.info()?;
+    {
+      let mut guard = DEVICES.write().unwrap();
+      let device = guard
+        .get_mut(&(bus_number, address))
+        .ok_or_else(|| anyhow::anyhow!("Device lost"))?;
+      device.state = DeviceState::Open(Arc::new(std::sync::Mutex::new(handle)), info.clone());
+    }
+    Ok(info)
+  })
+  .await
+  .map_err(|e| SerializedError::from(e))?
 }
 
 #[tauri::command]
@@ -154,221 +161,261 @@ pub fn close_device(bus_number: u8, address: u8) -> Result<impl Serialize, Seria
 }
 
 #[tauri::command]
-pub fn update_device<R: Runtime>(
+pub async fn update_device<R: Runtime>(
   bus_number: u8,
   address: u8,
   window: WebviewWindow<R>,
-) -> Result<impl Serialize, SerializedError> {
-  let dev = DevId {
-    bus_number,
-    address,
-  };
-  let handle = get_open_dev(&dev)?;
-  let handle = handle.lock().unwrap();
-  let info = err_wrap(handle.info(), dev, &window)?;
-  Ok(info)
+) -> Result<libnspire::info::Info, SerializedError> {
+  tauri::async_runtime::spawn_blocking(move || {
+    let dev = DevId {
+      bus_number,
+      address,
+    };
+    let handle = get_open_dev(&dev)?;
+    let handle = handle.lock().unwrap();
+    let info = err_wrap(handle.info(), dev, &window)?;
+    Ok(info)
+  })
+  .await
+  .map_err(|e| SerializedError::from(e))?
 }
 
 #[tauri::command]
-pub fn list_dir<R: Runtime>(
+pub async fn list_dir<R: Runtime>(
   bus_number: u8,
   address: u8,
   path: String,
   window: WebviewWindow<R>,
-) -> Result<impl Serialize, SerializedError> {
-  let dev = DevId {
-    bus_number,
-    address,
-  };
-  let handle = get_open_dev(&dev)?;
-  let handle = handle.lock().unwrap();
-  let dir = err_wrap(handle.list_dir(&path), dev, &window)?;
+) -> Result<Vec<FileInfo>, SerializedError> {
+  tauri::async_runtime::spawn_blocking(move || {
+    let dev = DevId {
+      bus_number,
+      address,
+    };
+    let handle = get_open_dev(&dev)?;
+    let handle = handle.lock().unwrap();
+    let dir = err_wrap(handle.list_dir(&path), dev, &window)?;
 
-  Ok(
-    dir
-      .iter()
-      .map(|file| FileInfo {
-        path: file.name().to_string_lossy().to_string(),
-        is_dir: file.entry_type() == EntryType::Directory,
-        date: file.date(),
-        size: file.size(),
-      })
-      .collect::<Vec<_>>(),
-  )
+    Ok(
+      dir
+        .iter()
+        .map(|file| FileInfo {
+          path: file.name().to_string_lossy().to_string(),
+          is_dir: file.entry_type() == EntryType::Directory,
+          date: file.date(),
+          size: file.size(),
+        })
+        .collect::<Vec<_>>(),
+    )
+  })
+  .await
+  .map_err(|e| SerializedError::from(e))?
 }
 
 #[tauri::command]
-pub fn download_file<R: Runtime>(
+pub async fn download_file<R: Runtime>(
   bus_number: u8,
   address: u8,
   path: (String, u64),
   dest: String,
   window: WebviewWindow<R>,
-) -> Result<impl Serialize, SerializedError> {
-  let dev = DevId {
-    bus_number,
-    address,
-  };
-  let (file, size) = path;
-  let dest = PathBuf::from(dest);
-  let handle = get_open_dev(&dev)?;
-  let handle = handle.lock().unwrap();
-  let mut buf = vec![0; size as usize];
-  err_wrap(
-    handle.read_file(
-      &file,
-      &mut buf,
-      &mut progress_sender(&window, dev, size as usize),
-    ),
-    dev,
-    &window,
-  )?;
-  if let Some(name) = file.split('/').last() {
-    File::create(dest.join(name))?.write_all(&buf)?;
-  }
-  Ok(())
+) -> Result<(), SerializedError> {
+  tauri::async_runtime::spawn_blocking(move || {
+    let dev = DevId {
+      bus_number,
+      address,
+    };
+    let (file, size) = path;
+    let dest = PathBuf::from(dest);
+    let handle = get_open_dev(&dev)?;
+    let handle = handle.lock().unwrap();
+    let mut buf = vec![0; size as usize];
+    err_wrap(
+      handle.read_file(
+        &file,
+        &mut buf,
+        &mut progress_sender(&window, dev, size as usize),
+      ),
+      dev,
+      &window,
+    )?;
+    if let Some(name) = file.split('/').last() {
+      File::create(dest.join(name))?.write_all(&buf)?;
+    }
+    Ok(())
+  })
+  .await
+  .map_err(|e| SerializedError::from(e))?
 }
 
 #[tauri::command]
-pub fn upload_file<R: Runtime>(
+pub async fn upload_file<R: Runtime>(
   bus_number: u8,
   address: u8,
   path: String,
   src: String,
   window: WebviewWindow<R>,
-) -> Result<impl Serialize, SerializedError> {
-  let dev = DevId {
-    bus_number,
-    address,
-  };
-  let file = PathBuf::from(src);
-  let handle = get_open_dev(&dev)?;
-  let handle = handle.lock().unwrap();
-  let mut buf = vec![];
-  File::open(&file)?.read_to_end(&mut buf)?;
-  let name = file
-    .file_name()
-    .ok_or_else(|| anyhow::anyhow!("Failed to get file name"))?
-    .to_string_lossy()
-    .to_string();
-  err_wrap(
-    handle.write_file(
-      &format!("{}/{}", path, name),
-      &buf,
-      &mut progress_sender(&window, dev, buf.len()),
-    ),
-    dev,
-    &window,
-  )?;
-  Ok(())
+) -> Result<(), SerializedError> {
+  tauri::async_runtime::spawn_blocking(move || {
+    let dev = DevId {
+      bus_number,
+      address,
+    };
+    let file = PathBuf::from(src);
+    let handle = get_open_dev(&dev)?;
+    let handle = handle.lock().unwrap();
+    let mut buf = vec![];
+    File::open(&file)?.read_to_end(&mut buf)?;
+    let name = file
+      .file_name()
+      .ok_or_else(|| anyhow::anyhow!("Failed to get file name"))?
+      .to_string_lossy()
+      .to_string();
+    err_wrap(
+      handle.write_file(
+        &format!("{}/{}", path, name),
+        &buf,
+        &mut progress_sender(&window, dev, buf.len()),
+      ),
+      dev,
+      &window,
+    )?;
+    Ok(())
+  })
+  .await
+  .map_err(|e| SerializedError::from(e))?
 }
 
 #[tauri::command]
-pub fn upload_os<R: Runtime>(
+pub async fn upload_os<R: Runtime>(
   bus_number: u8,
   address: u8,
   src: String,
   window: WebviewWindow<R>,
-) -> Result<impl Serialize, SerializedError> {
-  let dev = DevId {
-    bus_number,
-    address,
-  };
-  let handle = get_open_dev(&dev)?;
-  let handle = handle.lock().unwrap();
-  let mut buf = vec![];
-  File::open(&src)?.read_to_end(&mut buf)?;
-  err_wrap(
-    handle.send_os(&buf, &mut progress_sender(&window, dev, buf.len())),
-    dev,
-    &window,
-  )?;
-  Ok(())
+) -> Result<(), SerializedError> {
+  tauri::async_runtime::spawn_blocking(move || {
+    let dev = DevId {
+      bus_number,
+      address,
+    };
+    let handle = get_open_dev(&dev)?;
+    let handle = handle.lock().unwrap();
+    let mut buf = vec![];
+    File::open(&src)?.read_to_end(&mut buf)?;
+    err_wrap(
+      handle.send_os(&buf, &mut progress_sender(&window, dev, buf.len())),
+      dev,
+      &window,
+    )?;
+    Ok(())
+  })
+  .await
+  .map_err(|e| SerializedError::from(e))?
 }
 
 #[tauri::command]
-pub fn delete_file<R: Runtime>(
+pub async fn delete_file<R: Runtime>(
   bus_number: u8,
   address: u8,
   path: String,
   window: WebviewWindow<R>,
-) -> Result<impl Serialize, SerializedError> {
-  let dev = DevId {
-    bus_number,
-    address,
-  };
-  let handle = get_open_dev(&dev)?;
-  let handle = handle.lock().unwrap();
-  err_wrap(handle.delete_file(&path), dev, &window)?;
-  Ok(())
+) -> Result<(), SerializedError> {
+  tauri::async_runtime::spawn_blocking(move || {
+    let dev = DevId {
+      bus_number,
+      address,
+    };
+    let handle = get_open_dev(&dev)?;
+    let handle = handle.lock().unwrap();
+    err_wrap(handle.delete_file(&path), dev, &window)?;
+    Ok(())
+  })
+  .await
+  .map_err(|e| SerializedError::from(e))?
 }
 
 #[tauri::command]
-pub fn delete_dir<R: Runtime>(
+pub async fn delete_dir<R: Runtime>(
   bus_number: u8,
   address: u8,
   path: String,
   window: WebviewWindow<R>,
-) -> Result<impl Serialize, SerializedError> {
-  let dev = DevId {
-    bus_number,
-    address,
-  };
-  let handle = get_open_dev(&dev)?;
-  let handle = handle.lock().unwrap();
-  err_wrap(handle.delete_dir(&path), dev, &window)?;
-  Ok(())
+) -> Result<(), SerializedError> {
+  tauri::async_runtime::spawn_blocking(move || {
+    let dev = DevId {
+      bus_number,
+      address,
+    };
+    let handle = get_open_dev(&dev)?;
+    let handle = handle.lock().unwrap();
+    err_wrap(handle.delete_dir(&path), dev, &window)?;
+    Ok(())
+  })
+  .await
+  .map_err(|e| SerializedError::from(e))?
 }
 
 #[tauri::command]
-pub fn create_nspire_dir<R: Runtime>(
+pub async fn create_nspire_dir<R: Runtime>(
   bus_number: u8,
   address: u8,
   path: String,
   window: WebviewWindow<R>,
-) -> Result<impl Serialize, SerializedError> {
-  let dev = DevId {
-    bus_number,
-    address,
-  };
-  let handle = get_open_dev(&dev)?;
-  let handle = handle.lock().unwrap();
-  err_wrap(handle.create_dir(&path), dev, &window)?;
-  Ok(())
+) -> Result<(), SerializedError> {
+  tauri::async_runtime::spawn_blocking(move || {
+    let dev = DevId {
+      bus_number,
+      address,
+    };
+    let handle = get_open_dev(&dev)?;
+    let handle = handle.lock().unwrap();
+    err_wrap(handle.create_dir(&path), dev, &window)?;
+    Ok(())
+  })
+  .await
+  .map_err(|e| SerializedError::from(e))?
 }
 
 #[tauri::command]
-pub fn move_file<R: Runtime>(
+pub async fn move_file<R: Runtime>(
   bus_number: u8,
   address: u8,
   src: String,
   dest: String,
   window: WebviewWindow<R>,
-) -> Result<impl Serialize, SerializedError> {
-  let dev = DevId {
-    bus_number,
-    address,
-  };
-  let handle = get_open_dev(&dev)?;
-  let handle = handle.lock().unwrap();
-  err_wrap(handle.move_file(&src, &dest), dev, &window)?;
-  Ok(())
+) -> Result<(), SerializedError> {
+  tauri::async_runtime::spawn_blocking(move || {
+    let dev = DevId {
+      bus_number,
+      address,
+    };
+    let handle = get_open_dev(&dev)?;
+    let handle = handle.lock().unwrap();
+    err_wrap(handle.move_file(&src, &dest), dev, &window)?;
+    Ok(())
+  })
+  .await
+  .map_err(|e| SerializedError::from(e))?
 }
 
 #[tauri::command]
-pub fn copy<R: Runtime>(
+pub async fn copy<R: Runtime>(
   bus_number: u8,
   address: u8,
   src: String,
   dest: String,
   window: WebviewWindow<R>,
-) -> Result<impl Serialize, SerializedError> {
-  let dev = DevId {
-    bus_number,
-    address,
-  };
-  let handle = get_open_dev(&dev)?;
-  let handle = handle.lock().unwrap();
-  err_wrap(handle.copy_file(&src, &dest), dev, &window)?;
-  Ok(())
+) -> Result<(), SerializedError> {
+  tauri::async_runtime::spawn_blocking(move || {
+    let dev = DevId {
+      bus_number,
+      address,
+    };
+    let handle = get_open_dev(&dev)?;
+    let handle = handle.lock().unwrap();
+    err_wrap(handle.copy_file(&src, &dest), dev, &window)?;
+    Ok(())
+  })
+  .await
+  .map_err(|e| SerializedError::from(e))?
 }
