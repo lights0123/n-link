@@ -31,7 +31,7 @@
       </div>
     </button>
     <button class="mt-4 button gray-button"
-            @click="nativeUpload ? $refs.upload.click() : $devices.uploadOs(dev, info.os_extension.split('.').pop())">
+            @click="nativeUpload ? upload?.click() : $devices.uploadOs(dev, info.os_extension.split('.').pop())">
       Upload OS
     </button>
     <input v-if="nativeUpload" ref="upload" type="file" class="hidden" :accept="info.os_extension"
@@ -39,40 +39,45 @@
   </div>
 </template>
 
-<script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator';
-import type {Info, Version} from './devices';
-import fileSize from "filesize";
+<script setup lang="ts">
+import {inject, ref} from 'vue';
+import {DEVICES_KEY, type GenericDevices, type Info, type Version} from './devices';
+import {filesize} from 'filesize';
 
-@Component
-export default class FileView extends Vue {
-  @Prop({type: Object, required: true}) private info!: Info;
-  @Prop({type: String, required: true}) private dev!: string;
-  @Prop({type: Boolean, default: false}) private nativeUpload!: boolean;
-  refreshing = false;
+const props = withDefaults(defineProps<{
+  info: Info;
+  dev: string;
+  nativeUpload?: boolean;
+}>(), {
+  nativeUpload: false,
+});
 
-  formatSize(size: number) {
-    return fileSize(size, {round: 1});
+const devices = inject(DEVICES_KEY) as GenericDevices;
+
+const refreshing = ref(false);
+const upload = ref<HTMLInputElement | null>(null);
+
+function formatSize(size: number) {
+  return filesize(size, {round: 1});
+}
+
+function formatVersion(version: Version) {
+  return `${version.major}.${version.minor}.${version.patch}.${version.build}`;
+}
+
+async function refresh() {
+  refreshing.value = true;
+  try {
+    await devices.update(props.dev);
+  } catch (e) {
+    /* */
   }
+  refreshing.value = false;
+}
 
-  formatVersion(version: Version) {
-    return `${version.major}.${version.minor}.${version.patch}.${version.build}`;
-  }
-
-  async refresh() {
-    this.refreshing = true;
-    try {
-      await this.$devices.update(this.dev);
-    } catch (e) {
-      /* */
-    }
-    this.refreshing = false;
-  }
-
-  uploadNative(e: Event & { target: HTMLInputElement }) {
-    const file = e.target.files?.[0];
-    if (file) this.$devices.uploadOsFile(this.dev, file);
-  }
+function uploadNative(e: Event & { target: HTMLInputElement }) {
+  const file = e.target.files?.[0];
+  if (file) devices.uploadOsFile(props.dev, file);
 }
 </script>
 
