@@ -2,32 +2,35 @@
 name = "n-link"
 version = "0.1.6"
 description = "Free, cross-platform, CX-II compatible computer linking program for the TI-Nspire"
-authors = [ "Ben Schattinger <developer@lights0123.com>" ]
+authors = ["Ben Schattinger <developer@lights0123.com>"]
 license = "GPL-3.0"
 repository = "https://github.com/lights0123/n-link"
 default-run = "n-link"
-edition = "2018"
-build = "src/build.rs"
-
-[dependencies]
-anyhow = "1.0.32"
-serde_json = "1.0"
-libnspire = "0.2.2"
-lazy_static = "1.4.0"
-rusb = "0.6.4"
-serde = { version = "1.0", features = [ "derive" ] }
-tauri = { version = "1.0.0-beta.8", features = ["dialog-open", "dialog-save", "notification-all", "shell-open"] }
-clap = "3.0.0-beta.2"
-indicatif = "0.15"
-libusb1-sys = { version = "0.4.2", features = [ "vendored" ] }
-hashbrown = "0.11"
+edition = "2021"
+build = "build.rs"
 
 [build-dependencies]
-tauri-build = { version = "1.0.0-beta.4" }
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2.11.5", features = [] }
+tauri-plugin-dialog = "2.7.2"
+tauri-plugin-shell = "2.3.5"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+lazy_static = "1.4"
+libnspire = "0.2.3"
+rusb = "0.6.4"
+clap = { version = "4", features = ["derive"] }
+indicatif = "0.15"
+
+[patch.crates-io]
+libnspire-sys = { path = "../../vendor/libnspire-sys" }
 
 [features]
-custom-protocol = [ "tauri/custom-protocol" ]
-default = [ "custom-protocol" ]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
 
 [[bin]]
 name = "n-link"

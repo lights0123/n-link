@@ -1,14 +1,7 @@
 {
   "private": true,
-  "workspaces": {
-    "packages": [
-      "desktop",
-      "n-link-core",
-      "web"
-    ]
-  },
-  "dependencies": {
-    "@vue/cli-plugin-eslint": "~4.5.0",
-    "fork-ts-checker-webpack-plugin": "^5.2.0"
-  }
+  "workspaces": [
+    "desktop",
+    "n-link-core"
+  ]
 }

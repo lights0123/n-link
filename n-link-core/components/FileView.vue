@@ -10,55 +10,59 @@
   </div>
 </template>
 
-<script lang="ts">
-import {Component, Prop, Vue, Watch} from 'vue-property-decorator';
+<script setup lang="ts">
+import {computed, ref, watch} from 'vue';
 import type {FileInfo} from './devices';
-import FileIcon from "./FileIcon.vue";
+import FileIcon from './FileIcon.vue';
 
-@Component({
-  components: {FileIcon}
-})
-export default class FileView extends Vue {
-  @Prop({type: Array, default: () => ([])}) private files!: FileInfo[];
-  @Prop({type: Boolean, default: false}) private showHidden!: boolean;
-  selected: number[] = [];
+const props = withDefaults(defineProps<{
+  files: FileInfo[];
+  showHidden?: boolean;
+}>(), {
+  files: () => [],
+  showHidden: false,
+});
 
-  @Watch('selected', {deep: true, immediate: true})
-  onSelect(selected: number[]) {
-    this.$emit('select', selected.map(file => this.filteredFiles[file]));
+const emit = defineEmits<{
+  nav: [path: string];
+  select: [files: FileInfo[]];
+}>();
+
+const selected = ref<number[]>([]);
+
+const filteredFiles = computed(() => {
+  if (props.showHidden) return props.files;
+  return props.files.filter(file => file.isDir || file.path.endsWith('.tns'));
+});
+
+watch(selected, (sel) => {
+  emit('select', sel.map(file => filteredFiles.value[file]));
+}, {deep: true, immediate: true});
+
+watch(() => props.files, () => {
+  selected.value = [];
+});
+
+function formatPath({path, isDir}: FileInfo) {
+  const name = path.split('/').pop() as string;
+  if (props.showHidden || isDir) return name;
+  return name.substring(0, name.length - 4);
+}
+
+function xorSelection(i: number) {
+  if (selected.value.includes(i)) selected.value = selected.value.filter(num => num !== i);
+  else selected.value.push(i);
+}
+
+function shiftSelection(item: number) {
+  const lastSelected = selected.value[selected.value.length - 1];
+  if (lastSelected === undefined) {
+    selected.value.push(item);
+    return;
   }
-
-  @Watch('files')
-  onFileChange() {
-    this.selected = [];
-  }
-
-  get filteredFiles() {
-    if (this.showHidden) return this.files;
-    return this.files.filter(file => file.isDir || file.path.endsWith('.tns'));
-  }
-
-  formatPath({path, isDir}: FileInfo) {
-    const name = path.split('/').pop() as string;
-    if (this.showHidden || isDir) return name;
-    return name.substring(0, name.length - 4);
-  }
-
-  xorSelection(i: number) {
-    if (this.selected.includes(i)) this.selected = this.selected.filter(num => num !== i);
-    else this.selected.push(i);
-  }
-
-  shiftSelection(item: number) {
-    const lastSelected = this.selected[this.selected.length-1];
-    if(lastSelected === undefined) {
-      this.selected.push(item);
-      return;
-    }
-    const [lower, upper] = item > lastSelected ? [lastSelected, item] : [item, lastSelected];
-    for(let i = lower; i <= upper; i++) {
-      if (!this.selected.includes(i))this.selected.push(i);
-    }
+  const [lower, upper] = item > lastSelected ? [lastSelected, item] : [item, lastSelected];
+  for (let i = lower; i <= upper; i++) {
+    if (!selected.value.includes(i)) selected.value.push(i);
   }
 }
 </script>

@@ -1,47 +1,15 @@
 {
-  "tauri": {
-    "bundle": {
-      "active": true,
-      "targets": ["deb", "msi", "appimage", "dmg"],
-      "identifier": "com.lights0123.n-link",
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ],
-      "resources": [],
-      "externalBin": [],
-      "copyright": "Copyright (c) 2021 Ben Schattinger. Licensed under GPL-3.0",
-      "category": "Utility",
-      "shortDescription": "Free, cross-platform, CX-II compatible computer linking program for the TI-Nspire",
-      "longDescription": "Free, cross-platform, CX-II compatible computer linking program for the TI-Nspire",
-      "macOS": {
-        "frameworks": [],
-        "minimumSystemVersion": "",
-        "useBootstrapper": false,
-        "exceptionDomain": "",
-        "signingIdentity": null,
-        "entitlements": null
-      },
-      "windows": {
-        "certificateThumbprint": null,
-        "digestAlgorithm": "sha256",
-        "timestampUrl": ""
-      }
-    },
-    "updater": {
-      "active": false
-    },
-    "allowlist": {
-      "shell": {
-        "open": true
-      },
-      "dialog": {
-        "open": true
-      }
-    },
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "n-link",
+  "version": "0.1.6",
+  "identifier": "com.lights0123.n-link",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
     "windows": [
       {
         "title": "N-Link",
@@ -52,7 +20,24 @@
       }
     ],
     "security": {
-      "csp": "default-src blob: data: filesystem: ws: wss: http: https: tauri: 'unsafe-eval' 'unsafe-inline' 'self' img-src: 'self'"
+      "csp": "default-src blob: data: filesystem: ws: wss: http: https: tauri: 'unsafe-eval' 'unsafe-inline' 'self'; img-src 'self' asset: http://asset.localhost blob: data:"
     }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["deb", "appimage"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources": [],
+    "externalBin": [],
+    "copyright": "Copyright (c) 2021 Ben Schattinger. Licensed under GPL-3.0",
+    "category": "Utility",
+    "shortDescription": "Free, cross-platform, CX-II compatible computer linking program for the TI-Nspire",
+    "longDescription": "Free, cross-platform, CX-II compatible computer linking program for the TI-Nspire"
   }
 }

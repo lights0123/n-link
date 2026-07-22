@@ -1,11 +1,17 @@
-import {invoke} from '@tauri-apps/api/tauri';
-import {listen} from '@tauri-apps/api/event';
-import {open as openDialog} from '@tauri-apps/api/dialog';
-import {Component, Vue} from 'vue-property-decorator';
-import type {GenericDevices} from 'n-link-core/components/devices';
-
-
-export type DevId = { address: number; busNumber: number };
+import { reactive } from 'vue';
+import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
+import { open as openDialog } from '@tauri-apps/plugin-dialog';
+import type {
+    GenericDevices,
+    Device,
+    DevId,
+    FileInfo,
+    Info,
+    Progress,
+    PartialCmd,
+    Cmd,
+} from 'n-link-core/components/devices';
 
 function devToString(dev: DevId) {
     return `${dev.busNumber}:${dev.address}`;
@@ -16,43 +22,6 @@ function stringToDev(dev: string): DevId {
     // eslint-disable-next-line
     return {busNumber: Number.parseInt(parts[0]), address: Number.parseInt(parts[1])};
 }
-
-export type Version = { major: number; minor: number; patch: number; build: number };
-export type Lcd = { width: number; height: number; bpp: number; sample_mode: number };
-export type HardwareType =
-    | "Cas"
-    | "NonCas"
-    | "CasCx"
-    | "NonCasCx"
-    | { Unknown: number };
-// The current state of the calculator.
-export type RunLevel =
-    | "Recovery"
-    | "Os"
-    | { Unknown: number };
-export type Battery =
-    | "Powered"
-    | "Low"
-    | "Ok"
-    | { Unknown: number };
-export type Info = { free_storage: number; total_storage: number; free_ram: number; total_ram: number; version: Version; boot1_version: Version; boot2_version: Version; hw_type: HardwareType; clock_speed: number; lcd: Lcd; os_extension: string; file_extension: string; name: string; id: string; run_level: RunLevel; battery: Battery; is_charging: boolean };
-
-export type FileInfo = { path: string; isDir: boolean; date: number; size: number };
-
-export type Progress = { remaining: number; total: number };
-
-export type PartialCmd = { action: 'download'; path: [string, number]; dest: string }
-    | { action: 'upload'; path: string; src: string }
-    | { action: 'uploadOs'; src: string }
-    | { action: 'deleteFile'; path: string }
-    | { action: 'deleteDir'; path: string }
-    | { action: 'createDir'; path: string }
-    | { action: 'move'; src: string; dest: string }
-    | { action: 'copy'; src: string; dest: string };
-
-export type Cmd = { id: number } & PartialCmd;
-
-export type Device = { name: string; isCxIi: boolean; needsDrivers: boolean; info?: Info; progress?: Progress; queue?: Cmd[]; running?: boolean };
 
 async function downloadFile(dev: DevId | string, path: [string, number], dest: string) {
     if (typeof dev === 'string') dev = stringToDev(dev);
@@ -117,138 +86,70 @@ async function listAll(dev: DevId | string, path: FileInfo): Promise<FileInfo[]>
 
 let queueId = 0;
 
-@Component
-class Devices extends Vue implements GenericDevices {
-    devices: Record<string, Device> = {};
-    enumerating = false;
-    hasEnumerated = false;
-
-    created() {
-        this.enumerate().then(() => this.hasEnumerated = true, console.error);
-        listen('addDevice', dev => {
-            const payload = dev.payload as Device & DevId;
-            const str = devToString(payload);
-            const existing = this.devices[str] || {};
-            this.$set(this.devices, str, {...existing, ...payload});
-        });
-        listen('removeDevice', dev => {
-            this.$delete(this.devices, devToString(dev.payload as DevId));
-        });
-        listen('progress', dev => {
-            const payload = dev.payload as Progress & DevId;
-            const str = devToString(payload);
-            this.$set(this.devices[str], 'progress', payload);
-        });
-    }
-
-    async runQueue(dev: DevId | string) {
-        if (typeof dev !== 'string') dev = devToString(dev);
-        const device = this.devices[dev];
-        if (!device?.queue || device.running) return;
-        this.$set(device, 'running', true);
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-            // The device has been removed
-            if (!this.devices[dev]) return;
-
-            const cmd = device.queue[0];
-            if (!cmd) {
-                device.running = false;
-                return;
-            }
-            try {
-                if (cmd.action === 'download') {
-                    await downloadFile(dev, cmd.path, cmd.dest);
-                } else if (cmd.action === 'upload') {
-                    await uploadFile(dev, cmd.path, cmd.src);
-                } else if (cmd.action === 'uploadOs') {
-                    await uploadOs(dev, cmd.src);
-                } else if (cmd.action === 'deleteFile') {
-                    await deleteFile(dev, cmd.path);
-                } else if (cmd.action === 'deleteDir') {
-                    await deleteDir(dev, cmd.path);
-                } else if (cmd.action === 'createDir') {
-                    await createDir(dev, cmd.path);
-                } else if (cmd.action === 'move') {
-                    await move(dev, cmd.src, cmd.dest);
-                } else if (cmd.action === 'copy') {
-                    await copy(dev, cmd.src, cmd.dest);
-                }
-            } catch (e) {
-                console.error(e);
-            }
-            if ('progress' in device) this.$delete(device, 'progress');
-            device.queue.shift();
-            await this.update(dev);
-        }
-    }
-
-    private addToQueue(dev: string, ...cmds: PartialCmd[]) {
-        const device = this.devices[dev];
-        if (!device) return;
-        if (!device.queue) {
-            this.$set(device, 'queue', []);
-        }
-        device.queue?.push(...cmds.map(cmd => ({...cmd, id: queueId++} as Cmd)));
-        this.runQueue(dev);
-    }
+const state = reactive<GenericDevices>({
+    devices: {},
+    enumerating: false,
+    hasEnumerated: false,
 
     async enumerate() {
-        this.enumerating = true;
+        state.enumerating = true;
         try {
             for (const dev of await invoke('enumerate') as (Device & DevId)[]) {
-                this.$set(this.devices, devToString(dev as DevId), dev);
+                state.devices[devToString(dev as DevId)] = dev;
             }
         } finally {
-            this.enumerating = false;
+            state.enumerating = false;
         }
-    }
+    },
 
     async open(dev: DevId | string) {
         if (typeof dev === 'string') dev = stringToDev(dev);
-        const info = await invoke('open_device', {...dev});
-        this.$set(this.devices[devToString(dev)], 'info', info);
-    }
+        const info = await invoke<Info>('open_device', {...dev});
+        state.devices[devToString(dev)].info = info;
+    },
 
     async close(dev: DevId | string) {
         if (typeof dev === 'string') dev = stringToDev(dev);
         await invoke('close_device', {...dev});
-        this.$delete(this.devices[devToString(dev)], 'info');
-    }
+        delete state.devices[devToString(dev)].info;
+    },
 
     async update(dev: DevId | string) {
         if (typeof dev === 'string') dev = stringToDev(dev);
-        const info = await invoke('update_device', {...dev});
-        this.$set(this.devices[devToString(dev)], 'info', info);
-    }
+        const info = await invoke<Info>('update_device', {...dev});
+        state.devices[devToString(dev)].info = info;
+    },
 
     async listDir(dev: DevId | string, path: string) {
         return await listDir(dev, path);
-    }
+    },
 
     async promptUploadFiles(dev: DevId | string, path: string) {
         if (typeof dev !== 'string') dev = devToString(dev);
-        const files = await openDialog({filters:[{extensions:['tns'], name:'TNS files'}], multiple: true});
+        const files = await openDialog({filters: [{extensions: ['tns'], name: 'TNS files'}], multiple: true});
+        // The user can cancel the dialog, in which case `files` is null.
+        // Iterating a null value here would throw at runtime.
+        if (!files) return;
         for (const src of files) {
-            this.addToQueue(dev, {action: 'upload', path, src});
+            addToQueue(dev, {action: 'upload', path, src});
         }
-    }
+    },
 
     async uploadOs(dev: DevId | string, filter: string) {
         if (typeof dev !== 'string') dev = devToString(dev);
-        const src = await openDialog({filters:[{extensions:[filter], name:'TI Nspire OS upgrade files'}]}) as string | null;
+        const src = await openDialog({filters: [{extensions: [filter], name: 'TI Nspire OS upgrade files'}]}) as string | null;
         if (!src) return;
-        this.addToQueue(dev, {action: 'uploadOs', src});
-    }
+        addToQueue(dev, {action: 'uploadOs', src});
+    },
 
     async downloadFiles(dev: DevId | string, files: [string, number][]) {
         if (typeof dev !== 'string') dev = devToString(dev);
         const dest = await openDialog({directory: true}) as string | null;
         if (!dest) return;
         for (const path of files) {
-            this.addToQueue(dev, {action: 'download', path, dest});
+            addToQueue(dev, {action: 'download', path, dest});
         }
-    }
+    },
 
     async delete(dev: DevId | string, files: FileInfo[]) {
         if (typeof dev !== 'string') dev = devToString(dev);
@@ -257,35 +158,123 @@ class Devices extends Vue implements GenericDevices {
             toDelete.push(...await listAll(dev, file));
         }
         for (const file of toDelete) {
-            this.addToQueue(dev, {action: file.isDir ? 'deleteDir' : 'deleteFile', path: file.path});
+            addToQueue(dev, {action: file.isDir ? 'deleteDir' : 'deleteFile', path: file.path});
         }
-    }
+    },
 
     async createDir(dev: DevId | string, path: string) {
         if (typeof dev !== 'string') dev = devToString(dev);
-        this.addToQueue(dev, {action: 'createDir', path});
-    }
+        addToQueue(dev, {action: 'createDir', path});
+    },
 
     async copy(dev: DevId | string, src: string, dest: string) {
         if (typeof dev !== 'string') dev = devToString(dev);
-        this.addToQueue(dev, {action: 'copy', src, dest});
-    }
+        addToQueue(dev, {action: 'copy', src, dest});
+    },
 
     async move(dev: DevId | string, src: string, dest: string) {
         if (typeof dev !== 'string') dev = devToString(dev);
-        this.addToQueue(dev, {action: 'move', src, dest});
-    }
+        addToQueue(dev, {action: 'move', src, dest});
+    },
 
-    uploadFiles(): Promise<void> {
-        return Promise.resolve(undefined);
-    }
+    // The desktop app resolves uploads through a native OS file-picker dialog
+    // (see promptUploadFiles/uploadOs above), which yields a filesystem path
+    // that the Rust side reads directly. It has no way to turn a browser
+    // File object back into such a path, so — exactly as in the original
+    // Vue 2 desktop store — these two interface members are intentionally
+    // left unimplemented here. The web host (n-link/web) provides the real
+    // File-based implementation.
+    async uploadFiles(): Promise<void> {
+    },
 
-    uploadOsFile(): Promise<void> {
-        return Promise.resolve(undefined);
+    async uploadOsFile(): Promise<void> {
+    },
+});
+
+async function runQueue(dev: DevId | string) {
+    if (typeof dev !== 'string') dev = devToString(dev);
+    const device = state.devices[dev];
+    const queue = device?.queue;
+    if (!queue || device.running) return;
+    device.running = true;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+        // The device has been removed
+        if (!state.devices[dev]) return;
+
+        const cmd = queue[0];
+        if (!cmd) {
+            device.running = false;
+            return;
+        }
+        try {
+            if (cmd.action === 'download') {
+                if ('dest' in cmd && cmd.dest) {
+                    await downloadFile(dev, cmd.path, cmd.dest);
+                } else {
+                    console.error('Missing destination for download command', cmd);
+                }
+            } else if (cmd.action === 'upload') {
+                if ('src' in cmd) {
+                    await uploadFile(dev, cmd.path, cmd.src);
+                } else {
+                    console.error('File uploads are not supported by the desktop app', cmd);
+                }
+            } else if (cmd.action === 'uploadOs') {
+                if ('src' in cmd) {
+                    await uploadOs(dev, cmd.src);
+                } else {
+                    console.error('File uploads are not supported by the desktop app', cmd);
+                }
+            } else if (cmd.action === 'deleteFile') {
+                await deleteFile(dev, cmd.path);
+            } else if (cmd.action === 'deleteDir') {
+                await deleteDir(dev, cmd.path);
+            } else if (cmd.action === 'createDir') {
+                await createDir(dev, cmd.path);
+            } else if (cmd.action === 'move') {
+                await move(dev, cmd.src, cmd.dest);
+            } else if (cmd.action === 'copy') {
+                await copy(dev, cmd.src, cmd.dest);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+        if ('progress' in device) delete device.progress;
+        queue.shift();
+        await state.update(dev);
     }
 }
 
+function addToQueue(dev: string, ...cmds: PartialCmd[]) {
+    const device = state.devices[dev];
+    if (!device) return;
+    if (!device.queue) {
+        device.queue = [];
+    }
+    device.queue.push(...cmds.map(cmd => ({...cmd, id: queueId++} as Cmd)));
+    runQueue(dev);
+}
 
-const devices = new Devices();
-export default devices;
-Vue.prototype.$devices = devices;
+state.enumerate().then(() => {
+    state.hasEnumerated = true;
+}, console.error);
+
+listen('addDevice', dev => {
+    const payload = dev.payload as Device & DevId;
+    const str = devToString(payload);
+    const existing = state.devices[str] || {};
+    state.devices[str] = {...existing, ...payload};
+});
+
+listen('removeDevice', dev => {
+    delete state.devices[devToString(dev.payload as DevId)];
+});
+
+listen('progress', dev => {
+    const payload = dev.payload as Progress & DevId;
+    const str = devToString(payload);
+    state.devices[str].progress = payload;
+});
+
+export default state;

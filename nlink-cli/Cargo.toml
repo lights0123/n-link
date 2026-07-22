@@ -1,0 +1,22 @@
+[package]
+name = "nlink-cli"
+version = "0.1.6"
+description = "Standalone CLI for linking to the TI-Nspire (incl. CX II), extracted from n-link"
+edition = "2018"
+
+[[bin]]
+name = "n-link-cli"
+path = "src/main.rs"
+
+[dependencies]
+libnspire = "0.2.2"
+rusb = "0.6.4"
+clap = { version = "4", features = ["derive"] }
+indicatif = "0.15"
+# Link the system libusb (install libusb-1.0-0-dev). The vendored build in
+# libusb1-sys 0.4.x is broken on this toolchain, so we use the distro library.
+
+# Local patched libnspire-sys: raises the CX II NNSE handshake retry limit
+# (10 -> 100) so the address<->time handshake has time to complete.
+[patch.crates-io]
+libnspire-sys = { path = "../vendor/libnspire-sys" }

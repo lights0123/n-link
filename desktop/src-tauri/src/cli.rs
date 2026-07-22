@@ -3,18 +3,18 @@ use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::{fs::File, path::Path};
 
-use clap::Clap;
+use clap::{Args, Parser, Subcommand};
 use indicatif::{ProgressBar, ProgressStyle};
 use libnspire::{dir::EntryType, PID, PID_CX2, VID};
 
-#[derive(Clap, Debug)]
+#[derive(Parser, Debug)]
 #[clap(author, about, version)]
 struct Opt {
   #[clap(subcommand)]
   cmd: Option<SubCommand>,
 }
 
-#[derive(Clap, Debug)]
+#[derive(Subcommand, Debug)]
 enum SubCommand {
   Upload(Upload),
   Download(Download),
@@ -29,31 +29,31 @@ enum SubCommand {
 }
 
 /// Upload files to the calculator
-#[derive(Clap, Debug)]
+#[derive(Args, Debug)]
 struct Upload {
   /// Files to upload
-  #[clap(required = true, parse(from_os_str))]
+  #[clap(required = true)]
   files: Vec<PathBuf>,
   /// Destination path
   dest: String,
 }
 
 /// Download files from the calculator
-#[derive(Clap, Debug)]
+#[derive(Args, Debug)]
 struct Download {
   /// Files to download
   #[clap(required = true)]
   files: Vec<String>,
   /// Destination path
-  #[clap(required = true, parse(from_os_str))]
+  #[clap(required = true)]
   dest: PathBuf,
 }
 
 /// Upload and install a .tcc/.tco/.tcc2/.tco2/.tct2 OS file
-#[derive(Clap, Debug)]
+#[derive(Args, Debug)]
 struct UploadOS {
   /// Path to the OS file
-  #[clap(required = true, parse(from_os_str))]
+  #[clap(required = true)]
   file: PathBuf,
 
   /// Disables the file extension check
@@ -62,7 +62,7 @@ struct UploadOS {
 }
 
 /// Copy a file to a different location
-#[derive(Clap, Debug)]
+#[derive(Args, Debug)]
 struct Copy {
   /// Path to file
   #[clap(required = true)]
@@ -74,7 +74,7 @@ struct Copy {
 }
 
 /// Move a file or directory to a new location
-#[derive(Clap, Debug)]
+#[derive(Args, Debug)]
 struct Move {
   /// Path to file
   #[clap(required = true)]
@@ -86,7 +86,7 @@ struct Move {
 }
 
 /// Create a directory
-#[derive(Clap, Debug)]
+#[derive(Args, Debug)]
 struct Mkdir {
   /// Path to directory
   #[clap(required = true)]
@@ -94,7 +94,7 @@ struct Mkdir {
 }
 
 /// Delete a directory
-#[derive(Clap, Debug)]
+#[derive(Args, Debug)]
 struct Rmdir {
   /// Path to directory
   #[clap(required = true)]
@@ -102,7 +102,7 @@ struct Rmdir {
 }
 
 /// List the contents of a directory
-#[derive(Clap, Debug)]
+#[derive(Args, Debug)]
 struct Ls {
   /// Path to directory
   #[clap(required = true)]

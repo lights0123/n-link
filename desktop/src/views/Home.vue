@@ -2,7 +2,7 @@
   <div class="home h-full overflow-hidden">
     <div class="flex flex-row h-full">
       <div class="flex-shrink-0 border-r w-64">
-        <device-select :selected.sync="selectedCalculator"/>
+        <device-select v-model:selected="selectedCalculator"/>
         <div class="overflow-auto h-full px-4 py-4">
           <div v-if="needsDrivers && !isLinux">
             <h1 class="text-3xl">Drivers required</h1>
@@ -23,9 +23,9 @@
             <div class="lds-dual-ring"/>
           </div>
           <div v-else-if="calculator && calculator.info">
-            <calc-info :info="calculator.info" :dev="selectedCalculator"/>
+            <calc-info :info="calculator.info" :dev="selectedCalculator!"/>
             <label class="inline-flex items-center cursor-pointer mr-2 mt-4">
-              <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600 cursor-pointer" v-model="showHidden">
+              <input type="checkbox" class="h-5 w-5 text-blue-600 cursor-pointer" v-model="showHidden">
               <span class="mx-2 text-gray-700 select-none">Include hidden files</span>
             </label>
           </div>
@@ -33,82 +33,69 @@
       </div>
       <div class="w-full">
         <div class="h-full">
-          <file-browser v-if="calculator && calculator.info" :dev="selectedCalculator" :show-hidden="showHidden"/>
+          <file-browser v-if="calculator && calculator.info" :dev="selectedCalculator!" :show-hidden="showHidden"/>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import {Component, Vue, Watch} from 'vue-property-decorator';
-import {open} from '@tauri-apps/api/shell';
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue';
+import { open } from '@tauri-apps/plugin-shell';
 import CalcInfo from 'n-link-core/components/CalcInfo.vue';
 import FileBrowser from 'n-link-core/components/FileBrowser.vue';
-import DeviceSelect from "n-link-core/components/DeviceSelect.vue";
+import DeviceSelect from 'n-link-core/components/DeviceSelect.vue';
+import devices from '../components/devices';
 
 function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-@Component({
-  components: {
-    DeviceSelect,
-    FileBrowser,
-    CalcInfo,
-  },
-})
-export default class Home extends Vue {
-  selectedCalculator: string | null = null;
-  showHidden = false;
+const selectedCalculator = ref<string | null>(null);
+const showHidden = ref(false);
 
-  @Watch('$devices.hasEnumerated')
-  onEnumerated() {
-    const first = Object.keys(this.$devices.devices)[0];
-    if (first) this.selectedCalculator = first;
+function onEnumerated() {
+  const first = Object.keys(devices.devices)[0];
+  if (first) selectedCalculator.value = first;
+}
+
+async function onDeviceChange() {
+  if (!selectedCalculator.value) {
+    await sleep(1000);
+    if (selectedCalculator.value) return;
+    const first = Object.keys(devices.devices)[0];
+    if (first) selectedCalculator.value = first;
+  } else if (!Object.keys(devices.devices).includes(selectedCalculator.value)) {
+    selectedCalculator.value = null;
+    // go back and choose the first if available
+    onDeviceChange();
   }
+}
 
-  @Watch('$devices.devices')
-  async onDeviceChange() {
-    if (!this.selectedCalculator) {
-      await sleep(1000);
-      if (this.selectedCalculator) return;
-      const first = Object.keys(this.$devices.devices)[0];
-      if (first) this.selectedCalculator = first;
-    } else if (!Object.keys(this.$devices.devices).includes(this.selectedCalculator)) {
-      this.selectedCalculator = null;
-      // go back and choose the first if available
-      this.onDeviceChange();
+async function onSelectCalculator(dev: string | null) {
+  if (dev && !devices.devices[dev].info && !devices.devices[dev].needsDrivers) {
+    try {
+      await devices.open(dev);
+    } catch (e) {
+      console.error(e);
+      selectedCalculator.value = null;
     }
   }
+}
 
-  @Watch('selectedCalculator')
-  async onSelectCalculator(dev: string | null) {
-    if (dev && !this.$devices.devices[dev].info && !this.$devices.devices[dev].needsDrivers) {
-      try {
-        await this.$devices.open(dev);
-      } catch (e) {
-        console.error(e);
-        this.selectedCalculator = null;
-      }
-    }
-  }
+watch(() => devices.hasEnumerated, onEnumerated);
+watch(() => devices.devices, onDeviceChange, { deep: true });
+watch(selectedCalculator, onSelectCalculator);
 
-  get calculator() {
-    return this.selectedCalculator && this.$devices.devices[this.selectedCalculator];
-  }
+const calculator = computed(() => selectedCalculator.value && devices.devices[selectedCalculator.value]);
 
-  get needsDrivers() {
-    return this.selectedCalculator && this.$devices.devices[this.selectedCalculator]?.needsDrivers;
-  }
+const needsDrivers = computed(() => selectedCalculator.value && devices.devices[selectedCalculator.value]?.needsDrivers);
 
-  get isLinux() {
-    return navigator.platform.includes('Linux');
-  }
+const isLinux = computed(() => navigator.platform.includes('Linux'));
 
-  installDrivers(platform = 'windows') {
-    open(`https://lights0123.com/n-link/#${platform}`);
-  }
+function installDrivers(platform = 'windows') {
+  open(`https://lights0123.com/n-link/#${platform}`);
 }
 </script>
 

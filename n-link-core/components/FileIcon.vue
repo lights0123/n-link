@@ -1,161 +1,97 @@
 <template>
-  <img :width="width" :src="icon" alt="name"/>
+  <img :width="width" :src="icon" alt=""/>
 </template>
 
-<script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator';
+<script setup lang="ts">
+import { computed } from 'vue';
 
-@Component
-export default class FileView extends Vue {
-  @Prop({type: String, required: true}) private path!: string;
-  @Prop({type: Boolean, default: false}) private dir!: string;
-  @Prop({type: Number, default: 64}) private width!: number;
+const props = withDefaults(defineProps<{
+  path: string;
+  dir?: boolean;
+  width?: number;
+}>(), {
+  dir: false,
+  width: 64,
+});
 
-  get name() {
-    return this.path.split('/').pop() as string;
-  }
+// Vite replacement for webpack's require(). Eagerly resolves every SVG in
+// assets/ to its emitted URL at build time, keyed by module path.
+const assets = import.meta.glob<string>('../assets/**/*.svg', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+});
 
-  get ext() {
-    const parts = this.name.split('.');
-    if (parts[parts.length - 1] === 'tns') parts.pop();
-    if (parts.length < 2) return '';
-    return parts.pop() as string;
-  }
-
-  get icon() {
-    if (this.dir) {
-      switch (this.name.trim().toLowerCase()) {
-        case 'games':
-          return require('../assets/folders/games.svg');
-        case 'images':
-        case 'photos':
-          return require('../assets/folders/images.svg');
-        case 'music':
-        case 'sound':
-        case 'sounds':
-          return require('../assets/folders/music.svg');
-        case 'script':
-        case 'scripts':
-        case 'program':
-        case 'programs':
-          return require('../assets/folders/scripts.svg');
-        case 'template':
-        case 'templates':
-          return require('../assets/folders/templates.svg');
-        case 'video':
-        case 'videos':
-          return require('../assets/folders/video.svg');
-        default:
-          return require('../assets/folders/folder.svg');
-      }
-    }
-    if (this.name === 'ndless_resources.tns') return require('../assets/files/resources.svg');
-    if (this.name.startsWith('ndless_installer')) return require('../assets/files/installer.svg');
-    switch (this.ext.toLowerCase()) {
-      case 'bin':
-        return require('../assets/files/binary.svg');
-      case 'ical':
-      case 'ics':
-      case 'ifb':
-      case 'icalendar':
-        return require('../assets/files/calendar.svg');
-      case 'cfg':
-        return require('../assets/files/cfg.svg');
-      case 'vcf':
-        return require('../assets/files/contact.svg');
-      case 'csv':
-      case 'log':
-      case 'logs':
-        return require('../assets/files/csv.svg');
-      case 'sql':
-      case 'db':
-      case 'sqlite':
-        return require('../assets/files/db.svg');
-      case 'epub':
-        return require('../assets/files/epub.svg');
-      case 'eot':
-      case 'otf':
-      case 'ttf':
-      case 'woff':
-      case 'woff2':
-        return require('../assets/files/font.svg');
-      case 'png':
-      case 'bmp':
-      case 'jpg':
-      case 'jpeg':
-      case 'jpe':
-      case 'jif':
-      case 'jfif':
-      case 'jfi':
-      case 'jp2':
-      case 'j2k':
-      case 'jpf':
-      case 'jpx':
-      case 'jpm':
-      case 'mj2':
-      case 'gif':
-      case 'tiff':
-      case 'tif':
-      case 'ppm':
-      case 'pgm':
-      case 'pbm':
-      case 'pnm':
-      case 'webp':
-      case 'heif':
-      case 'heifs':
-      case 'heic':
-      case 'heics':
-      case 'avci':
-      case 'avcs':
-      case 'avif':
-      case 'avifs':
-      case 'ico':
-      case 'icon':
-      case 'icns':
-      case 'pcx':
-      case 'pgf':
-      case 'tga':
-      case 'psd':
-      case 'xcf':
-        return require('../assets/files/image.svg');
-      case 'js':
-      case 'mjs':
-        return require('../assets/files/js.svg');
-      case 'json':
-      case 'json5':
-        return require('../assets/files/json.svg');
-      case 'lua':
-        return require('../assets/files/lua.svg');
-      case 'pdf':
-        return require('../assets/files/pdf.svg');
-      case 'py':
-        return require('../assets/files/python.svg');
-      case 'rom':
-      case '89u':
-      case 'smc':
-      case 'sfc':
-      case 'srm':
-      case 'img':
-        return require('../assets/files/rom.svg');
-      case 'svg':
-      case 'svgz':
-        return require('../assets/files/svg.svg');
-      case 'txt':
-        return require('../assets/files/txt.svg');
-      case 'mp4':
-        return require('../assets/files/video.svg');
-      case 'xml':
-        return require('../assets/files/xml.svg');
-      case 'zip':
-      case 'tar':
-      case 'gz':
-        return require('../assets/files/zip.svg');
-      default:
-        return require('../assets/files/unknown.svg');
-    }
-  }
+function asset(name: string): string {
+  const key = `../assets/${name}`;
+  const found = assets[key];
+  if (!found) throw new Error(`missing icon asset: ${key}`);
+  return found;
 }
-</script>
 
-<style scoped lang="scss">
-</style>
+const FOLDER_ICONS: Record<string, string> = {
+  games: 'games',
+  images: 'images',
+  photos: 'images',
+  music: 'music',
+  sound: 'music',
+  sounds: 'music',
+  script: 'scripts',
+  scripts: 'scripts',
+  program: 'scripts',
+  programs: 'scripts',
+  template: 'templates',
+  templates: 'templates',
+  video: 'video',
+  videos: 'video',
+};
+
+const EXT_ICONS: Record<string, string> = {
+  bin: 'binary',
+  ical: 'calendar', ics: 'calendar', ifb: 'calendar', icalendar: 'calendar',
+  cfg: 'cfg',
+  vcf: 'contact',
+  csv: 'csv', log: 'csv', logs: 'csv',
+  sql: 'db', db: 'db', sqlite: 'db',
+  epub: 'epub',
+  eot: 'font', otf: 'font', ttf: 'font', woff: 'font', woff2: 'font',
+  png: 'image', bmp: 'image', jpg: 'image', jpeg: 'image', jpe: 'image',
+  jif: 'image', jfif: 'image', jfi: 'image', jp2: 'image', j2k: 'image',
+  jpf: 'image', jpx: 'image', jpm: 'image', mj2: 'image', gif: 'image',
+  tiff: 'image', tif: 'image', ppm: 'image', pgm: 'image', pbm: 'image',
+  pnm: 'image', webp: 'image', heif: 'image', heifs: 'image', heic: 'image',
+  heics: 'image', avci: 'image', avcs: 'image', avif: 'image', avifs: 'image',
+  ico: 'image', icon: 'image', icns: 'image', pcx: 'image', pgf: 'image',
+  tga: 'image', psd: 'image', xcf: 'image',
+  js: 'js', mjs: 'js',
+  json: 'json', json5: 'json',
+  lua: 'lua',
+  pdf: 'pdf',
+  py: 'python',
+  rom: 'rom', '89u': 'rom', smc: 'rom', sfc: 'rom', srm: 'rom', img: 'rom',
+  svg: 'svg', svgz: 'svg',
+  txt: 'txt',
+  mp4: 'video',
+  xml: 'xml',
+  zip: 'zip', tar: 'zip', gz: 'zip',
+};
+
+const name = computed(() => props.path.split('/').pop() as string);
+
+const ext = computed(() => {
+  const parts = name.value.split('.');
+  if (parts[parts.length - 1] === 'tns') parts.pop();
+  if (parts.length < 2) return '';
+  return parts.pop() as string;
+});
+
+const icon = computed(() => {
+  if (props.dir) {
+    const key = FOLDER_ICONS[name.value.trim().toLowerCase()] ?? 'folder';
+    return asset(`folders/${key}.svg`);
+  }
+  if (name.value === 'ndless_resources.tns') return asset('files/resources.svg');
+  if (name.value.startsWith('ndless_installer')) return asset('files/installer.svg');
+  return asset(`files/${EXT_ICONS[ext.value.toLowerCase()] ?? 'unknown'}.svg`);
+});
+</script>
