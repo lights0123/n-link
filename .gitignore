@@ -31,3 +31,6 @@ target/
 dist/
 desktop/src-tauri/icons/android/
 desktop/src-tauri/icons/ios/
+
+# vendored path-dependency lockfiles are unused (resolution happens at the consuming crate root)
+vendor/*/Cargo.lock
