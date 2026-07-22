@@ -93,7 +93,7 @@ The same binary works without a GUI:
   `--appimage-extract` and launch `squashfs-root/AppRun` instead.
 - **`vendor/libnspire-sys`** at the repo root is a locally patched crate wired in
   via `[patch.crates-io]`. It raises the CX II NNSE handshake retry limit
-  (10 → 30). The build will not reproduce upstream behaviour without it.
-- **Known upstream limitation:** libnspire's CX II support has been frozen since
-  2020. Against current CX II firmware, data transfers may return `Busy` or hang.
-  This is independent of the Tauri version and is not a defect in this port.
+  (10 → 30), fixes the `readPacket` checksum length bug that made CX II
+  transfers fail with a reported `Busy`, and adds NNSE retransmission. The build
+  will not reproduce upstream behaviour without it. See
+  [`nlink-cli/README.md`](../nlink-cli/README.md) for the details.

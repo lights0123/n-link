@@ -41,11 +41,25 @@ cargo build --release
    tells it to leave TI devices alone. Restart it after adding the rule:
    `sudo systemctl start ModemManager`.
 
-## Known limitation
-libnspire's CX II ("NavNet SE") protocol support has been **frozen upstream since 2020**
-(`lights0123/libnspire`, last commit 2020-09-30; crates.io `libnspire-sys` 0.3.4 is the newest).
-Against **current (2026) CX II firmware** the USB link and handshake work — real filenames
-are transferred — but **multi-packet stream transfers are unreliable** and long operations
-(e.g. listing a folder with many entries) can fail mid-transfer with `Busy`. Short transfers
-are more likely to complete. This is a library/firmware-era mismatch, not a local
-configuration problem.
+## The `Busy` error on CX II (fixed)
+Long operations against current CX II firmware — listing a folder with many entries,
+downloading a file of any size — used to fail with `Busy`. Two bugs in the vendored
+libnspire, both fixed in `vendor/libnspire-sys/libnspire/src/cx2.cpp`:
+
+1. **`readPacket` checksummed the wrong number of bytes.** It used the byte count the
+   bulk transfer returned instead of the length the packet declares. The calculator can
+   hand back more bytes than the packet occupies (a 64-byte packet arriving as 65), and
+   the stray byte failed the checksum. The packet was then dropped and never acked, so
+   the calculator retransmitted it forever until the receive loop gave up. The same
+   variable was also wrong after a multi-chunk read, where it held only the last chunk's
+   size — this is what made large stream transfers unreliable.
+2. **No retransmission.** A lost packet or lost ack was fatal; the packet was sent once
+   and never repeated. It now retransmits with the "not the first try" bit (`reqAck` bit
+   3) that TI's own stack uses, keeping the same sequence number.
+
+Note that the error was never really `Busy`: the `libnspire` **crate** (0.2.3, not this
+vendored C library) matches its positive `NSPIRE_ERR_*` constants against libnspire's
+negative return codes, so every error falls through to the libusb table and is
+mislabelled. `-NSPIRE_ERR_INVALPKT` is `-6`, and so is `LIBUSB_ERROR_BUSY`. A reported
+`Busy` is really `Invalid packet received`; `Timeout` is really `NACK received`, and so
+on. That mismapping is upstream in the crate and is **not** fixed here.

@@ -48,6 +48,18 @@ int gettimeofday(struct timeval *t, void *timezone) {
 // Windows...
 #undef min
 
+/* Default timeout for reads that are just waiting for the calculator to say
+   something on its own schedule. */
+#define NSP_CX2_READ_TIMEOUT 60000
+/* How long to wait for an ack before assuming the packet (or its ack) was
+   lost and sending it again. Kept generous: slow operations (flash writes,
+   OS install) can legitimately take a while to be acknowledged, and a
+   needless retransmission is more expensive than a little patience. */
+#define NSP_CX2_ACK_TIMEOUT 2000
+/* Total time to keep retransmitting one packet before giving up with BUSY.
+   TI's own stack derives its retry count the same way, as total/ack. */
+#define NSP_CX2_ACK_TOTAL_TIMEOUT 60000
+
 enum Address {
 	AddrAll		= 0xFF,
 	AddrMe		= 0xFE,
@@ -155,14 +167,14 @@ static uint16_t compute_checksum(const uint8_t *data, uint32_t size)
 	return acc;
 }
 
-static bool readPacket(libusb_device_handle *handle, NNSEMessage *message, int maxlen)
+static bool readPacket(libusb_device_handle *handle, NNSEMessage *message, int maxlen, unsigned int timeout = NSP_CX2_READ_TIMEOUT)
 {
 	if(maxlen < sizeof(NNSEMessage))
 		return false;
 
 	int transferred = 0;
 	memset(message, 0, sizeof(NNSEMessage));
-	int r = libusb_bulk_transfer(handle, 0x81, reinterpret_cast<unsigned char*>(message), maxlen, &transferred, 60000);
+	int r = libusb_bulk_transfer(handle, 0x81, reinterpret_cast<unsigned char*>(message), maxlen, &transferred, timeout);
 
 	if(r < 0
 		|| transferred < sizeof(NNSEMessage))
@@ -191,7 +203,11 @@ static bool readPacket(libusb_device_handle *handle, NNSEMessage *message, int m
 	dumpPacket(message);
 #endif
 
-	if(compute_checksum(reinterpret_cast<uint8_t*>(message), transferred) != 0xFFFF)
+	/* Checksum over the length the packet declares, not over what the bulk
+	   transfer happened to hand back. The calculator can return more bytes
+	   than the packet occupies, and after the continuation loop above
+	   `transferred` only holds the size of the final chunk anyway. */
+	if(compute_checksum(reinterpret_cast<uint8_t*>(message), completeLength) != 0xFFFF)
 		return false;
 
 	return true;
@@ -409,7 +425,13 @@ int packet_send_cx2(struct nspire_handle *nsp_handle, char *data, int size)
 
 	int len = sizeof(NNSEMessage) + size;
 	NNSEMessage *msg = reinterpret_cast<NNSEMessage*>(malloc(len));
+	if(!msg)
+		return -NSPIRE_ERR_NOMEM;
 
+	/* misc and unknown are covered by the checksum, so they have to be set to
+	   something deterministic rather than left as malloc garbage. */
+	msg->misc = 0;
+	msg->unknown = 0;
 	msg->service = StreamService;
 	msg->src = AddrMe;
 	msg->dest = AddrCalc;
@@ -419,33 +441,49 @@ int packet_send_cx2(struct nspire_handle *nsp_handle, char *data, int size)
 
 	memcpy(getPacketData(msg), data, size);
 
-	int ret = -NSPIRE_ERR_SUCCESS;
-	if(!writePacket(handle, msg))
-		ret = -NSPIRE_ERR_BUSY;
-	else
+	const int maxlen = sizeof(NNSEMessage) + 1472;
+	NNSEMessage * const message = reinterpret_cast<NNSEMessage*>(malloc(maxlen));
+	if(!message)
 	{
-		const int maxlen = sizeof(NNSEMessage) + 1472;
-		NNSEMessage * const message = reinterpret_cast<NNSEMessage*>(malloc(maxlen));
+		free(msg);
+		return -NSPIRE_ERR_NOMEM;
+	}
 
-		bool acked = false;
-		for(int i = 40; i-- && !ret && !acked;)
+	/* Either the packet or its ack can go missing, and on current CX II
+	   firmware that happens often enough that a single attempt makes long
+	   transfers (a large directory listing, say) fail routinely. Retransmit
+	   the same seqno until it is acked, which is what TI's own stack does. */
+	const int attempts = NSP_CX2_ACK_TOTAL_TIMEOUT / NSP_CX2_ACK_TIMEOUT;
+	bool acked = false;
+
+	for(int attempt = 0; attempt < attempts && !acked; attempt++)
+	{
+		/* Bit 3 marks a retransmission, so the calculator can drop the
+		   duplicate if it did receive the original and only the ack was
+		   lost. The seqno deliberately stays the same. */
+		msg->reqAck = attempt ? 0x9 : 0x1;
+
+		if(!writePacket(handle, msg))
+			continue;
+
+		/* Service whatever arrives until the ack shows up or we run out of
+		   patience and send again. */
+		while(readPacket(handle, message, maxlen, NSP_CX2_ACK_TIMEOUT))
 		{
-			if(!readPacket(handle, message, maxlen))
-				continue;
-
 			handlePacket(nsp_handle, message);
 
 			if(message->dest == AddrMe
 				&& message->service == (StreamService | AckFlag)
 				&& message->seqno == msg->seqno)
+			{
 				acked = true;
+				break;
+			}
 		}
-
-		if(!acked)
-			ret = -NSPIRE_ERR_BUSY;
-
-		free(message);
 	}
+
+	int ret = acked ? -NSPIRE_ERR_SUCCESS : -NSPIRE_ERR_BUSY;
+	free(message);
 
 	free(msg);
 
