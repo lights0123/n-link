@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "test": "vitest run"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.11.1",
@@ -23,12 +24,15 @@
     "@tailwindcss/forms": "^0.5.11",
     "@tauri-apps/cli": "^2",
     "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/test-utils": "^2.4.6",
     "autoprefixer": "^10.5.4",
+    "happy-dom": "^15.11.7",
     "postcss": "^8.5.21",
     "sass": "^1.101.3",
     "tailwindcss": "^3.4.19",
     "typescript": "~5.6.2",
     "vite": "^6.0.3",
+    "vitest": "^2.1.8",
     "vue-tsc": "^2.1.10"
   }
 }
