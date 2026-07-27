@@ -2,6 +2,7 @@ module.exports = {
   theme: {
     fontFamily: {
       sans: [
+        'Inter',
         'Cantarell',
         'Roboto',
         'system-ui',
@@ -31,16 +32,20 @@ module.exports = {
         '3/2': '0.375em',
       },
       colors: {
-        ui: {
-          background: 'var(--color-ui-background)',
-          emph: 'var(--color-ui-emph)',
-          sidebar: 'var(--color-ui-sidebar)',
-          text: 'var(--color-ui-text)',
-          'text-inv': 'var(--color-ui-text-inv)',
-          primary: 'var(--color-ui-primary)',
-          border: 'var(--color-ui-border)',
-          blockquote: 'var(--color-ui-blockquote)',
+        surface: 'var(--surface)',
+        raised: 'var(--raised)',
+        edge: 'var(--edge)',
+        fg: 'var(--fg)',
+        muted: 'var(--muted)',
+        accent: {
+          DEFAULT: 'var(--accent)',
+          fg: 'var(--accent-fg)',
         },
+        selected: 'var(--selected)',
+        ok: 'var(--ok)',
+        warn: 'var(--warn)',
+        danger: 'var(--danger)',
+        success: 'var(--success)',
       },
       height: {
         min: 'min-content',

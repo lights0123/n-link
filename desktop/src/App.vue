@@ -9,9 +9,10 @@
 
 #app {
   user-select: none;
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', theme('fontFamily.sans');
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
+  background-color: var(--surface);
+  color: var(--fg);
 }
 </style>

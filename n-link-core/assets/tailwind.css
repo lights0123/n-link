@@ -4,6 +4,57 @@
 
 @tailwind utilities;
 
+/* Slate theme tokens. Dark is the default (and the fallback when the OS
+   preference is unknown); light applies when the OS asks for it. The
+   [data-theme] blocks let a future manual toggle force a theme. */
+:root,
+:root[data-theme='dark'] {
+    --surface: #0f1117;
+    --raised: #161a25;
+    --edge: #1d2130;
+    --fg: #e6e8ee;
+    --muted: #8b91a3;
+    --accent: #2d4bd8;
+    --accent-fg: #ffffff;
+    --selected: #1a2547;
+    --ok: #2dd4bf;
+    --warn: #f5b942;
+    --danger: #ef4444;
+    --success: #22c55e;
+}
+
+@media (prefers-color-scheme: light) {
+    :root:not([data-theme='dark']) {
+        --surface: #f7f8fa;
+        --raised: #ffffff;
+        --edge: #e6e9ef;
+        --fg: #1c2330;
+        --muted: #6b7280;
+        --accent: #2d4bd8;
+        --accent-fg: #ffffff;
+        --selected: #e4ebff;
+        --ok: #0d9488;
+        --warn: #d97706;
+        --danger: #dc2626;
+        --success: #16a34a;
+    }
+}
+
+:root[data-theme='light'] {
+    --surface: #f7f8fa;
+    --raised: #ffffff;
+    --edge: #e6e9ef;
+    --fg: #1c2330;
+    --muted: #6b7280;
+    --accent: #2d4bd8;
+    --accent-fg: #ffffff;
+    --selected: #e4ebff;
+    --ok: #0d9488;
+    --warn: #d97706;
+    --danger: #dc2626;
+    --success: #16a34a;
+}
+
 @keyframes lds-dual-ring {
     0% {
         transform: rotate(0deg);
@@ -11,8 +62,4 @@
     100% {
         transform: rotate(360deg);
     }
-}
-
-.el-popover {
-    @apply select-none;
 }
