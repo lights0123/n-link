@@ -5,35 +5,29 @@
     <h3 class="text-center text-xs select-text">{{ info.id }}</h3>
     <br>
     <div :title="`${formatSize(info.free_storage)} free`">
-      <small class="block select-text">
+      <small class="block select-text text-muted">
         Storage: {{ formatSize(info.total_storage - info.free_storage) }} / {{ formatSize(info.total_storage) }} used
       </small>
-      <div class="mb-2 bg-gray-300 rounded-full">
-        <div :style="{width: `${100 - (info.free_storage / info.total_storage) * 100}%`}"
-             class="bg-blue-500 py-1 rounded-full"/>
-      </div>
+      <progress-bar class="mb-2" :fraction="1 - info.free_storage / info.total_storage" color="accent"/>
     </div>
     <div :title="`${formatSize(info.free_ram)} free`">
-      <small class="block select-text">
+      <small class="block select-text text-muted">
         RAM: {{ formatSize(info.total_ram - info.free_ram) }} / {{ formatSize(info.total_ram) }} used
       </small>
-      <div class="mb-2 bg-gray-300 rounded-full">
-        <div :style="{width: `${100 - (info.free_ram / info.total_ram) * 100}%`}"
-             class="bg-teal-400 py-1 rounded-full"/>
-      </div>
+      <progress-bar class="mb-2" :fraction="1 - info.free_ram / info.total_ram" color="ok"/>
     </div>
     <small class="block select-text">Boot1: {{ formatVersion(info.boot1_version) }}</small>
     <small class="block select-text">Boot2: {{ formatVersion(info.boot2_version) }}</small>
-    <button class="mt-4 button" @click="refresh" :disabled="refreshing">
+    <app-button class="mt-4" :disabled="refreshing" @click="refresh">
       <div class="flex">
         <div v-if="refreshing" class="lds-dual-ring"/>
         Refresh
       </div>
-    </button>
-    <button class="mt-4 button gray-button"
-            @click="nativeUpload ? upload?.click() : $devices.uploadOs(dev, osExtension)">
+    </app-button>
+    <app-button class="mt-4" variant="secondary"
+                @click="nativeUpload ? upload?.click() : $devices.uploadOs(dev, osExtension)">
       Upload OS
-    </button>
+    </app-button>
     <input v-if="nativeUpload" ref="upload" type="file" class="hidden" :accept="info.os_extension"
            @change="uploadNative"/>
   </div>
@@ -43,6 +37,8 @@
 import {computed, inject, ref} from 'vue';
 import {DEVICES_KEY, type GenericDevices, type Info, type Version} from './devices';
 import {filesize} from 'filesize';
+import AppButton from './AppButton.vue';
+import ProgressBar from './ProgressBar.vue';
 
 const props = withDefaults(defineProps<{
   info: Info;
@@ -86,22 +82,6 @@ function uploadNative(e: Event) {
 </script>
 
 <style scoped lang="scss">
-.button {
-  @apply bg-blue-500 text-white rounded px-6 py-2.5 font-bold;
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.75;
-  }
-
-  &:focus {
-    outline: none;
-  }
-}
-
-.gray-button {
-  @apply bg-gray-400 text-gray-800;
-}
-
 .lds-dual-ring {
   $scale-factor: 0.2;
   margin-right: 64px * $scale-factor + 8px;
@@ -118,8 +98,8 @@ function uploadNative(e: Event) {
   height: 64px;
   margin: 8px;
   border-radius: 50%;
-  border: 6px solid white;
-  border-color: white transparent white transparent;
+  border: 6px solid var(--accent-fg);
+  border-color: var(--accent-fg) transparent var(--accent-fg) transparent;
   animation: lds-dual-ring 1.2s linear infinite;
 }
 
