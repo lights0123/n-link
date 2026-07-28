@@ -1,47 +1,43 @@
 <template>
   <div>
-    <el-popover width="300" popper-class="focus:outline-none">
-      <div>
-        <div v-if="!queue.length">
-          Nothing to do
-        </div>
-        <div v-for="(item, i) in queue" :key="item.id" class="flex items-center">
-          <div class="min-w-0 flex-grow">
-            <p class="truncate">{{ item.desc }}</p>
-            <div v-if="i === 0 && device.progress">
-              <small class="block tabular-nums">
-                {{ (100 - device.progress.remaining / device.progress.total * 100).toFixed(1) }}%
-              </small>
-              <div class="mb-2 bg-gray-300 rounded-full">
-                <div :style="{width: `${100-device.progress.remaining/device.progress.total * 100}%`}"
-                     class="bg-teal-400 py-1 rounded-full"/>
-              </div>
-            </div>
-          </div>
-          <div class="ml-2 flex-shrink-0">
-            <button class="focus:outline-none" :disabled="i===0" :class="i===0 && 'cursor-not-allowed'"
-                    @click="device.queue?.splice(i, 1)">
-              <img :src="xCircle" :class="i===0 && 'opacity-25'"/>
-            </button>
-          </div>
-        </div>
-      </div>
-      <template #reference>
+    <popover :width="300" placement="bottom-end">
+      <template #trigger>
         <svg viewBox="-1 -1 2 2" class="circle focus:outline-none">
           <circle r="1" class="bg"/>
           <path class="fg" :d="pathData"/>
         </svg>
       </template>
-    </el-popover>
+      <div v-if="!queue.length" class="text-muted">
+        Nothing to do
+      </div>
+      <div v-for="(item, i) in queue" :key="item.id" class="flex items-center text-fg">
+        <div class="min-w-0 flex-grow">
+          <p class="truncate">{{ item.desc }}</p>
+          <div v-if="i === 0 && device.progress">
+            <small class="block tabular-nums text-muted">
+              {{ (100 - device.progress.remaining / device.progress.total * 100).toFixed(1) }}%
+            </small>
+            <progress-bar class="mb-2"
+                          :fraction="1 - device.progress.remaining / device.progress.total" color="ok"/>
+          </div>
+        </div>
+        <div class="ml-2 flex-shrink-0">
+          <button class="focus:outline-none text-fg" :disabled="i===0" :class="i===0 && 'cursor-not-allowed'"
+                  @click="device.queue?.splice(i, 1)">
+            <icon name="x-circle" :size="20" :class="i===0 && 'opacity-25'"/>
+          </button>
+        </div>
+      </div>
+    </popover>
   </div>
 </template>
 
 <script setup lang="ts">
 import {computed} from 'vue';
-import {ElPopover} from 'element-plus';
-import 'element-plus/es/components/popover/style/css';
 import type {Device} from './devices';
-import xCircle from 'feather-icons/dist/icons/x-circle.svg';
+import Popover from './Popover.vue';
+import ProgressBar from './ProgressBar.vue';
+import Icon from './Icon.vue';
 
 function getCoordinatesForPercent(percent: number) {
   const x = Math.cos(2 * Math.PI * percent);
@@ -102,11 +98,11 @@ const queue = computed(() => {
   transform: rotate(-90deg);
 
   .bg {
-    fill: theme('colors.gray.200');
+    fill: var(--edge);
   }
 
   .fg {
-    fill: theme('colors.gray.800');
+    fill: var(--accent);
   }
 }
 </style>
