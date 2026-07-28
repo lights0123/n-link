@@ -3,77 +3,74 @@
     <div v-if="files.length === 1">
       <div class="w-full flex flex-col items-center">
         <file-icon :path="files[0].path" :dir="files[0].isDir" :width="96"/>
-        <p class="text-center w-full break-words">{{ formatPath(files[0]) }}</p>
-        <p v-if="!files[0].isDir" class="mt-2 text-sm">{{ formatSize(files[0].size) }}</p>
+        <p class="text-center w-full break-words text-fg">{{ formatPath(files[0]) }}</p>
+        <p v-if="!files[0].isDir" class="mt-2 text-sm text-muted">{{ formatSize(files[0].size) }}</p>
       </div>
-      <button v-if="!files[0].isDir" class="mt-4 button w-full" @click="download">
+      <app-button v-if="!files[0].isDir" class="mt-4 w-full" @click="download">
         Download
-      </button>
-      <el-popover
-          width="190"
-          popper-class="focus:outline-none" @show="newName = formatPath(files[0])" v-model:visible="renamePopup">
+      </app-button>
+      <popover v-model:visible="renamePopup" :width="190" class="w-full block">
+        <template #trigger>
+          <app-button class="mt-4 w-full" variant="secondary" @click="newName = formatPath(files[0])">
+            Rename
+          </app-button>
+        </template>
         <form @submit.prevent="rename">
           <input v-model="newName"
-                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                 class="border border-edge rounded w-full py-2 px-3 bg-surface text-fg leading-tight focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                  type="text" placeholder="New name">
-          <button class="mt-4 button success w-full" :class="{disabled: !isValidName}" type="submit"
-                  :disabled="!isValidName">
+          <app-button class="mt-4 w-full" variant="success" :disabled="!isValidName" type="submit">
             Rename
-          </button>
+          </app-button>
         </form>
-        <template #reference>
-          <button class="mt-4 button w-full">
-            Rename
-          </button>
-        </template>
-      </el-popover>
+      </popover>
     </div>
     <div v-else-if="files.length && files.every(file => !file.isDir)">
-      <button class="mt-4 button" @click="download">
+      <app-button class="mt-4" @click="download">
         Download {{ files.length > 1 ? `${files.length} files` : '' }}
-      </button>
+      </app-button>
     </div>
     <div v-if="files.length">
-      <el-popover width="170" popper-class="focus:outline-none" v-model:visible="deletePopup">
-        <div>
+      <popover v-model:visible="deletePopup" :width="170" class="w-full block">
+        <template #trigger>
+          <app-button class="mt-4 w-full" variant="danger">
+            Delete {{ files.length > 1 ? `${files.length} files` : '' }}
+          </app-button>
+        </template>
+        <div class="text-fg">
           Delete {{ files.length }} file{{ files.length === 1 ? '' : 's' }}?
           <div class="flex w-full justify-between">
-            <button class="mt-4 button small" @click="deletePopup = false">
+            <app-button class="mt-4" size="sm" variant="secondary" @click="deletePopup = false">
               Cancel
-            </button>
-            <button class="mt-4 button small danger" @click="deleteFiles">
+            </app-button>
+            <app-button class="mt-4" size="sm" variant="danger" @click="deleteFiles">
               Delete
-            </button>
+            </app-button>
           </div>
         </div>
-        <template #reference>
-          <button class="mt-4 button danger w-full">
-            Delete {{ files.length > 1 ? `${files.length} files` : '' }}
-          </button>
-        </template>
-      </el-popover>
+      </popover>
     </div>
     <div class="flex-grow"/>
     <div class="pb-4">
-      <el-popover width="170" popper-class="focus:outline-none" v-model:visible="createDirPopup" @show="newName = ''">
-        <template #reference>
-          <button class="mt-4 button w-full text-sm">
+      <popover v-model:visible="createDirPopup" :width="170" class="w-full block" placement="top-start">
+        <template #trigger>
+          <app-button class="mt-4 w-full" variant="secondary" size="sm" @click="newName = ''">
             Create directory
-          </button>
+          </app-button>
         </template>
         <form @submit.prevent="$devices.createDir(dev, `${path}/${newName}`)">
           <input v-model="newName"
-                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                 class="border border-edge rounded w-full py-2 px-3 bg-surface text-fg leading-tight focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                  type="text" placeholder="New directory">
-          <button class="mt-4 button success w-full" :class="{disabled: !newName.length}" type="submit"
-                  :disabled="!newName.length">
+          <app-button class="mt-4 w-full" variant="success" :disabled="!newName.length" type="submit">
             Create
-          </button>
+          </app-button>
         </form>
-      </el-popover>
-      <button class="mt-4 button w-full" @click="nativeUpload ? upload?.click() : $devices.promptUploadFiles(dev, path)">
+      </popover>
+      <app-button class="mt-4 w-full" variant="secondary"
+                  @click="nativeUpload ? upload?.click() : $devices.promptUploadFiles(dev, path)">
         Upload files
-      </button>
+      </app-button>
       <input v-if="nativeUpload" ref="upload" type="file" class="hidden" multiple accept=".tns" @change="uploadNative" />
     </div>
   </div>
@@ -81,8 +78,8 @@
 
 <script setup lang="ts">
 import { computed, inject, ref } from 'vue';
-import { ElPopover } from 'element-plus';
-import 'element-plus/es/components/popover/style/css';
+import AppButton from './AppButton.vue';
+import Popover from './Popover.vue';
 import { DEVICES_KEY, type GenericDevices, type FileInfo } from './devices';
 import { filesize } from 'filesize';
 import FileIcon from './FileIcon.vue';
@@ -146,29 +143,3 @@ function uploadNative(e: Event) {
   devices.uploadFiles(props.dev, props.path, [...(files || [])]);
 }
 </script>
-
-<style scoped lang="scss">
-.button {
-  @apply bg-gray-400 text-gray-800 rounded px-6 py-2.5 font-bold;
-  &:focus {
-    outline: none;
-  }
-
-  &.danger {
-    @apply bg-red-600 text-white;
-  }
-
-  &.success {
-    @apply bg-green-500 text-white;
-  }
-
-  &.disabled {
-    @apply opacity-75 cursor-not-allowed;
-  }
-
-  &.small {
-    @apply px-3 py-2;
-  }
-}
-
-</style>
