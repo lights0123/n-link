@@ -49,4 +49,36 @@ describe('Popover', () => {
     await wrapper.get('.trg').trigger('click');
     expect(wrapper.get('[data-testid="panel"]').attributes('style')).toContain('width: 200px');
   });
+
+  it('applies bottom-end placement classes', async () => {
+    const wrapper = mount(Popover, {
+      attachTo: document.body,
+      props: { placement: 'bottom-end' },
+      slots: { trigger: '<button class="trg">o</button>', default: '<div>b</div>' },
+    });
+    await wrapper.get('.trg').trigger('click');
+    expect(wrapper.get('[data-testid="panel"]').classes()).toEqual(
+      expect.arrayContaining(['top-full', 'right-0']));
+  });
+
+  it('applies top-start placement classes', async () => {
+    const wrapper = mount(Popover, {
+      attachTo: document.body,
+      props: { placement: 'top-start' },
+      slots: { trigger: '<button class="trg">o</button>', default: '<div>b</div>' },
+    });
+    await wrapper.get('.trg').trigger('click');
+    expect(wrapper.get('[data-testid="panel"]').classes()).toEqual(
+      expect.arrayContaining(['bottom-full', 'left-0', 'mb-1']));
+  });
+
+  it('applies a string width verbatim', async () => {
+    const wrapper = mount(Popover, {
+      attachTo: document.body,
+      props: { width: '12rem' },
+      slots: { trigger: '<button class="trg">o</button>', default: '<div>b</div>' },
+    });
+    await wrapper.get('.trg').trigger('click');
+    expect(wrapper.get('[data-testid="panel"]').attributes('style')).toContain('width: 12rem');
+  });
 });

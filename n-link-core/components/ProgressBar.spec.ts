@@ -26,4 +26,9 @@ describe('ProgressBar', () => {
     const wrapper = mount(ProgressBar, { props: { fraction: 0.5, color: 'ok' } });
     expect(fill(wrapper).classes()).toContain('bg-ok');
   });
+
+  it('applies the warn color class', () => {
+    const wrapper = mount(ProgressBar, { props: { fraction: 0.5, color: 'warn' } });
+    expect(fill(wrapper).classes()).toContain('bg-warn');
+  });
 });
