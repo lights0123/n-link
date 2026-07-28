@@ -69,10 +69,9 @@ function shiftSelection(item: number) {
 
 <style scoped lang="scss">
 .selected {
-  background-color: #4d88e8;
-  @apply rounded;
+  @apply rounded bg-selected;
   p {
-    @apply text-white;
+    @apply text-fg;
   }
 }
 </style>

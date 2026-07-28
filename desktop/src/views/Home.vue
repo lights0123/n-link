@@ -1,21 +1,21 @@
 <template>
   <div class="home h-full overflow-hidden">
     <div class="flex flex-row h-full">
-      <div class="flex-shrink-0 border-r w-64">
+      <div class="flex-shrink-0 border-r border-edge w-64">
         <device-select v-model:selected="selectedCalculator"/>
         <div class="overflow-auto h-full px-4 py-4">
           <div v-if="needsDrivers && !isLinux">
             <h1 class="text-3xl">Drivers required</h1>
             <p>The WinUSB driver is required to use this device.</p>
             <p class="text-center mt-2">
-              <a href="#" @click.prevent="installDrivers()" class="text-blue-600">See installation instructions</a>
+              <a href="#" @click.prevent="installDrivers()" class="text-accent">See installation instructions</a>
             </p>
           </div>
           <div v-else-if="needsDrivers && isLinux">
             <h1 class="text-3xl">udev rules required</h1>
             <p>udev rules are required to access this device.</p>
             <p class="text-center mt-2">
-              <a href="#" @click.prevent="installDrivers('linux')" class="text-blue-600">See installation
+              <a href="#" @click.prevent="installDrivers('linux')" class="text-accent">See installation
                 instructions</a>
             </p>
           </div>
@@ -25,8 +25,8 @@
           <div v-else-if="calculator && calculator.info">
             <calc-info :info="calculator.info" :dev="selectedCalculator!"/>
             <label class="inline-flex items-center cursor-pointer mr-2 mt-4">
-              <input type="checkbox" class="h-5 w-5 text-blue-600 cursor-pointer" v-model="showHidden">
-              <span class="mx-2 text-gray-700 select-none">Include hidden files</span>
+              <input type="checkbox" class="h-5 w-5 text-accent cursor-pointer" v-model="showHidden">
+              <span class="mx-2 text-muted select-none">Include hidden files</span>
             </label>
           </div>
         </div>
@@ -107,7 +107,7 @@ function installDrivers(platform = 'windows') {
 }
 
 .lds-dual-ring:after {
-  $color: theme('colors.gray.400');
+  $color: var(--muted);
   content: " ";
   display: block;
   width: 64px;

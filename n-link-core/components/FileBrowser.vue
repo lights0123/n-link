@@ -1,11 +1,11 @@
 <template>
   <div class="h-full">
-    <div class="border-b py-2 px-2 header flex">
+    <div class="border-b border-edge py-2 px-2 header flex">
       <ol class="flex">
         <li v-for="(part, i) in parts" :key="i" class="" :class="{active: i === parts.length - 1}">
-          <span class="inline-block cursor-pointer bg-gray-200 px-4 py-1 rounded-full"
+          <span class="inline-block cursor-pointer bg-raised text-fg px-4 py-1 rounded-full"
                 @click="goToIndex(i)">{{ part || 'Home' }}</span>
-          <img v-if="i < parts.length - 1" class="inline img-fix" :src="chevronRight"/>
+          <icon v-if="i < parts.length - 1" name="chevron-right" :size="16" class="inline text-muted"/>
         </li>
       </ol>
       <div class="flex-grow"/>
@@ -19,7 +19,7 @@
           <div class="lds-dual-ring"/>
         </div>
       </div>
-      <div class="overflow-auto h-full px-4 pt-4 w-48 flex-shrink-0 border-l">
+      <div class="overflow-auto h-full px-4 pt-4 w-48 flex-shrink-0 border-l border-edge">
         <file-data :files="selected" :show-hidden="showHidden" :dev="dev" :path="path" :native-upload="nativeUpload"/>
       </div>
     </div>
@@ -32,7 +32,7 @@ import FileView from './FileView.vue';
 import {DEVICES_KEY, type GenericDevices, type FileInfo} from './devices';
 import FileData from './FileData.vue';
 import DeviceQueue from './DeviceQueue.vue';
-import chevronRight from 'feather-icons/dist/icons/chevron-right.svg';
+import Icon from './Icon.vue';
 
 const devices = inject(DEVICES_KEY) as GenericDevices;
 
@@ -108,7 +108,7 @@ function goToIndex(i: number) {
 }
 
 .active span {
-  @apply bg-blue-500 text-white;
+  @apply bg-accent text-accent-fg;
 }
 
 .img-fix {
@@ -122,7 +122,7 @@ function goToIndex(i: number) {
 }
 
 .lds-dual-ring:after {
-  $color: theme('colors.gray.400');
+  $color: var(--muted);
   content: " ";
   display: block;
   width: 64px;
