@@ -5,7 +5,6 @@
     "feather-icons": "^4.29.2"
   },
   "peerDependencies": {
-    "element-plus": "^2.14.3",
     "vue": "^3.5.40"
   },
   "devDependencies": {

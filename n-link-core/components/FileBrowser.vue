@@ -111,10 +111,6 @@ function goToIndex(i: number) {
   @apply bg-accent text-accent-fg;
 }
 
-.img-fix {
-  margin-top: -1px;
-}
-
 .lds-dual-ring {
   display: inline-block;
   width: 80px;
