@@ -23,3 +23,7 @@ pnpm-debug.log*
 *.sw?
 
 *.tns
+
+# Local macOS release artifacts
+/releases/
+/desktop/dist/

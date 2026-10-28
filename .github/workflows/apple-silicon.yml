@@ -1,0 +1,48 @@
+name: Apple Silicon
+
+on:
+  push:
+    paths:
+      - '.github/workflows/apple-silicon.yml'
+      - 'scripts/build-apple-silicon.sh'
+      - 'desktop/**'
+      - 'n-link-core/**'
+      - 'package.json'
+      - 'yarn.lock'
+      - 'postcss.config.js'
+      - 'LICENSE'
+  pull_request:
+    paths:
+      - '.github/workflows/apple-silicon.yml'
+      - 'scripts/build-apple-silicon.sh'
+      - 'desktop/**'
+      - 'n-link-core/**'
+      - 'package.json'
+      - 'yarn.lock'
+      - 'postcss.config.js'
+      - 'LICENSE'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Rust toolchain
+        run: rustup toolchain install 1.77.2 --profile minimal
+      - name: Build native app and archive
+        run: ./scripts/build-apple-silicon.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: n-link-macos-arm64
+          path: |
+            releases/N-Link_*_macOS_arm64.zip
+            releases/N-Link_*_macOS_arm64.zip.sha256
+          if-no-files-found: error
